@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>영화 추천 서비스</title>
+  </head>
+  <body>
+    <div class="title">
+      <div style="font-size: 40px">비슷한 영화 추천 서비스</div>
+    </div>
+    <p style="font-size: 23px" ; align="center" ;>
+      마음에 들었던 영화 제목을 입력해주세요
+      <div style="text-align: center">
+        <form id="search-form">
+          <input type="text" name="movie" size="40" /><br><br>
+          <input type="submit" style="width: 40pt; height: 22pt" value="제출">
+        </form>
+      </div>
+    </p>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('#search-form').submit(function(event) {
+          event.preventDefault(); // 기본 동작(페이지 이동)을 중지
+          const movieTitle = $('input[name="movie"]').val(); // 검색어 가져오기
+          $.ajax({
+            url: 'http://3.105.118.201:8000/api/movies/',
+            type: 'GET',
+
+            data: { movie: movieTitle },
+            success: function(response) {
+              const url = `./after.html?movie=${encodeURIComponent(movieTitle)}`; // after.html 페이지 주소 생성
+              window.location.href = url; // 페이지 이동
+            },
+            error: function(error) {
+              console.log(error);
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
