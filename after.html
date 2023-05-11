@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>영화 추천 서비스</title>
+  </head>
+  <body>
+    <div class="title">
+      <div style="font-size: 40px">
+        영화를 검색한 결과입니다!
+        <span id="movie-title"></span>
+      </div>
+      <div style="font-size: 20px">
+        검색한 영화 :
+        <span id="result"></span>
+      </div>
+    </div>
+    <div id="movie-list" style="margin-top: 30px; font-size: 23px"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        const params = new URLSearchParams(window.location.search); // URL 파라미터 가져오기
+        const movieTitle = params.get("movie"); // movieTitle 가져오기
+
+        // movieTitle 출력하기
+        $("#result").text(movieTitle);
+
+        // 비슷한 영화 목록 가져오기
+        $.ajax({
+          url: `http://3.105.118.201:8000/api/movies/?movie=${encodeURIComponent(
+            movieTitle
+          )}`,
+          type: "GET",
+          success: function (response) {
+            const movieList = response.movie; // 영화 목록 가져오기
+            let movieListHtml = ""; // 출력할 HTML 초기화
+            for (let i = 0; i < movieList.length; i++) {
+              movieListHtml += `<div>${i + 1}. ${movieList[i][0]}</div>`; // 출력할 HTML 추가
+            }
+            $("#movie-list").html(movieListHtml); // HTML 출력
+          },
+          error: function (error) {
+            console.log(error);
+          },
+        });
+      });
+    </script>
+  </body>
+</html>
