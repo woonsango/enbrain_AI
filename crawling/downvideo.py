@@ -1,64 +1,72 @@
-import os
-import time
 import pickle
+import os
 from pytube import YouTube
+from pydub import AudioSegment
+import whisper
+import torch
+
+# 피클파일 해결하기
+
+# 모델 로드하기
+model = whisper.load_model("medium")
 
 # 피클 파일 경로
-file_path = 'music_data.pickle'
+music_data_pickle = "music_data.pickle"
+music_res_pickle = "music_res.pickle"
 
-# 다운로드 위치
-download_path = '/home/seeun/Desktop/music_video'
+# music_data.pickle 파일 로드
+with open(music_data_pickle, 'rb') as file:
+    music_data = pickle.load(file)
 
-# 피클 파일 로드
-with open(file_path, 'rb') as f:
-    music_data = pickle.load(f)
+# 기존 결과 로드 또는 파일 생성
+try:
+    with open(music_res_pickle, 'rb') as file:
+        music_res = pickle.load(file)
+except FileNotFoundError:
+    music_res = {}
 
-# 다운로드 완료된 영상 개수 및 총 소요 시간 초기화
-completed_downloads = 0
-total_time = 0
-start_time = time.time()
+# 가사 추출 함수
+def whisperlyrics(audio_file_path):
+    audio_file = open(audio_file_path, "rb")
+    result = model.transcribe("song.mp3")
+    lyrics = result["text"]
+    return lyrics
 
-# 모든 영상 다운로드
-for data in music_data:
-    video_url = data['URL']
+# 음악 데이터 처리
+for idx, song_data in enumerate(music_data[:5], 1):
+    song_name = song_data['노래']
+    song_url = song_data['URL']
+    
+    print(f"Processing Song {idx}: {song_name}")
 
     try:
-        # YouTube 동영상 객체 생성
-        youtube = YouTube(video_url)
-
-        # 'age restricted'인 경우 건너뛰기
-        if youtube.age_restricted:
-            print(f"다운로드 실패: {video_url} - Age restricted, skipping")
+        # MP3 파일 다운로드
+        yt = YouTube(song_url)
+        stream = yt.streams.filter(only_audio=True).first()
+        output_file = stream.download(filename='song.mp3')
+        
+        # 6분 이상인 노래는 제외
+        audio_duration = AudioSegment.from_file(output_file).duration_seconds
+        if audio_duration > 6 * 60:
+            print(f"Song {idx} exceeds 6-minute limit. Skipping.")
+            os.remove(output_file)  # MP3 파일 삭제
             continue
 
-        # 동영상 다운로드
-        youtube.streams.get_lowest_resolution().download(output_path=download_path)
-        print(f"다운로드 완료: {video_url}")
+        # MP3 파일을 이용하여 가사 추출
+        lyrics = whisperlyrics(output_file)
+        print(lyrics)
 
-        # 오디오 스트림 필터링 (mp3 포맷)
-        audio_stream = youtube.streams.filter(only_audio=True).first()
+        # 결과 저장
+        song_data['가사'] = lyrics
+        # music_res[song_name] = song_data  # Store song data in the music_res dictionary
 
-        # mp3 다운로드
-        mp3_filename = audio_stream.download(output_path=download_path)
-
-        # 다운로드한 파일 이름을 .mp3로 변경
-        new_filename = os.path.splitext(mp3_filename)[0] + '.mp3'
-        os.rename(mp3_filename, new_filename)
-
-        # 다운로드 및 변환 완료 및 소요 시간 정보 출력
-        print(f"다운로드 및 변환 완료: {video_url}")
-
-        # 다운로드 완료된 영상 개수 증가
-        completed_downloads += 1
-
-        # 50개 다운로드 완료 시 반복 종료
-        if completed_downloads >= 50:
-            break
+        # MP3 파일 삭제
+        os.remove(output_file)
 
     except Exception as e:
-        print(f"다운로드 실패: {video_url} - {str(e)}")
+        print(f"Skipping Song {idx}: {song_name} ({str(e)})")
+        continue
 
-end_time = time.time()
-# 다운로드 완료된 영상 개수 및 총 소요 시간 출력
-print(f"다운로드 완료된 영상 개수: {completed_downloads}")
-print(f"총 소요 시간: {end_time - start_time}초")
+# music_res.pickle 파일에 결과 저장
+with open(music_res_pickle, 'wb') as file:
+    pickle.dump(music_res, file)
