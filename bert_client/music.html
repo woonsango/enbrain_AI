@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="music_css.css" />
+    <title>영화 추천 서비스</title>
+  </head>
+  <body>
+    <div class="title">
+      <div style="font-size: 40px">비슷한 영화 추천 서비스</div>
+    </div>
+    <p style="font-size: 23px" ; align="center" ;>
+      마음에 들었던 영화 제목을 입력해주세요
+      <div style="text-align: center">
+        <form id="search-form">
+          <input type="text" name="movie" size="40" /><br><br>
+          <input type="submit" style="width: 40pt; height: 22pt" value="제출">
+        </form>
+      </div>
+    </p>
+    <!-- jQuery는 HTML 이벤트 처리와 같은 기능을 부여하는 오픈소스 기반의 자바스크립트 라이브러리
+		CDN : 웹 주소, 빠르게 JQuery를 로드할 수 있음 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery 라이브러리를 CDN에서 가져오기 -->
+    <script>
+      $(document).ready(function() { // 문서가 준비되면 매개변수로 넣은 콜백 함수를 실행
+        $('#search-form').submit(function(event) { // 검색 폼에서 버튼이 클릭되는 이벤트 발생시 호출됨
+          event.preventDefault(); // 검색 버튼 클릭시 기본 동작(새로고침)을 중지
+          const movieTitle = $('input[name="movie"]').val(); // 검색어를 가져와 'movieTitle'변수에 할당
+          $.ajax({ // AJAX 요청 보냄, 동적인 웹 페이지를 만들기 위한 기법
+            url: 'http://54.66.102.19:8000/api/music/', // 요청할 서버 URL 지정
+            type: 'GET', // 요청 방식을 GET방식으로 지정
+            dataType: 'json', // 받아올 데이터의 자료형 지정
+            data: { movie: movieTitle }, // 딕셔너리 형태 movie 키 값에 입력받은 movieTitle 변수 값 value로 전
+            success: function(response) { //요청이 성공한 경우 실행할 콜백 함수
+              // console.log(response) ;
+              const musicList = response.title ;
+              const urlList = response.url ;
+              // console.log(musicList) ;
+              // console.log(urlList) ;
+              // const movieList = response.movie; // 응답 데이터에서 영화 목록 가져오기
+              let musicListHtml = ""; // 생성된 영화 목록 출력 위한 HTML 문자열 저장, 이전 검색 결과에 남아있는 HTML 문자열 초기화 
+              for (let i = 0; i < musicList.length; i++) {
+                musicListHtml += `<div>`
+                musicListHtml += `<p>${i + 1}. ${musicList[i]}</p>`; // 영화 목록을 돌며 배열에 저장된 목록을 div 태그 형태로 변환 후 변수에 추가 
+                musicListHtml += `<iframe width="560" height="315" src="https://www.youtube.com/embed/${urlList[i]}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`
+                musicListHtml += `</div>`
+              }
+              // localStorage.setItem("movieTitle", movieTitle); // 페이지에서 전달받은 영화 제목 localStorage에 저장
+              localStorage.setItem("musicListHtml", musicListHtml); // 검색 결과 HTML 문자열 localStorage에 저장
+              const url = `./video.html`; // after.html 페이지 주소 생성
+              window.location.href = url; // 페이지 이동
+            },
+            error: function(error) { // 요청 실패시 error 콜백 함수 호출
+              console.log(error);
+            }
+          });
+        });
+      });
+    </script>    
+  </body>
+</html>
