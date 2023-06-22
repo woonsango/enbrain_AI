@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="video_css.css" /> -->
+    <style>
+        #n {
+        border: 0px;
+        height: auto;
+        width: auto;
+    }
+
+
+    div:not(#n) {
+        height: 375px;
+        width: 560px;
+        border: 5px solid #31d67b;
+        margin: 0 auto ;
+        margin-bottom: 1px; 
+        
+    }
+
+    #title {
+        font-size: 50px;
+        text-align: center;
+}
+    </style>
+    <title>Document</title>
+
+</head>
+<body>
+    <p id="title">
+        키워드 내용: ----
+    </p>
+    <div id="n">
+        <!-- <div>
+            <p>노래 제목: -----------</p>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/LLXxgtjx4lc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            
+        </div>
+        <div>
+            <p>노래 제목: -----------</p>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/BZEjXGZMxrE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            
+        </div>
+        <div>
+            <p>노래 제목: -----------</p>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/7HDeem-JaSY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            
+        </div>
+        <div>
+            <p>노래 제목: -----------</p>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/lpfhD2InQQM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            
+        </div> -->
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // 페이지 로딩이 끝나면 실행됨
+        const params = new URLSearchParams(window.location.search); // URL 파라미터 가져오기
+        const musicList = localStorage.getItem("musicListHtml"); // localStorage를 이용하여 movie.html에서 저장한 movieTitle 가져오기
+        $("#n").html(musicList); // id가 search인 html요소에 출력
+      });
+    </script>
+</body>
+</html>
