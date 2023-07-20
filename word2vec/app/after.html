@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="index.css" />
+    <title>영화 추천 서비스</title>
+  </head>
+  <body>
+    <div class="title">
+      <div style="font-size: 40px">영화를 검색한 결과입니다!</div>
+      <div style="padding: 30px"></div>
+      <div style="font-size: 20px">
+        검색한 영화 :
+        <span id="search"></span> //movieTitle 출력
+      </div>
+      <div style="padding: 10px"></div>
+      <div style="font-size: 20px">
+        <span id="result"></span>
+      </div>
+    </div>
+    <div id="movie-list" style="margin-top: 30px; font-size: 23px"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // 페이지 로딩이 끝나면 실행됨
+        const params = new URLSearchParams(window.location.search); // URL 파라미터 가져오기
+        const movieTitle = localStorage.getItem("movieTitle"); // localStorage를 이용하여 movie.html에서 저장한 movieTitle 가져오기
+        $("#search").text(movieTitle); // id가 search인 html요소에 출력
+        const movieListHtml = localStorage.getItem("movieListHtml"); // localStorage를 이용하여 movie.html에서 저장한 영화제목들 가져오기
+        $("#result").html(movieListHtml); // id가 result인 html요소에 결과값들 출
+      });
+    </script>
+  </body>
+</html>
