@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+<head>
+  <style>
+    .container {display: flex; flex-direction: column; align-items: center; font-size: x-small;}
+
+    .input-container {display: flex; gap: 10px; font-size: x-small;}
+
+    table {width: 90%; border-top: 1px solid #444444; border-collapse: collapse; text-align: center;}
+  th, td {border-bottom: 1px solid #444444; padding: 20px; text-align: center;}
+  
+    p {display: flex; justify-content: center;}
+
+    .button-container {display: flex; justify-content: flex-end; gap: 1%; flex: 1; margin-right: 6%;}
+    /* flex: 1; -> 추가된 부분: 남은 공간을 모두 차지하도록 설정 */
+    button {background-color: transparent; border: none; cursor: pointer; width: 17px;}
+  </style>
+</head>
+
+<body>
+  <div class="container" style="padding-top: 7%;">
+    <div class="input-container">
+        <input type="text" id="searchInput" style="width: 500px; height: 25px; font-size: x-small;" />
+        <input type="submit" value="검색" style="width: 50px; height: 30px;" />  
+    </div>
+  </div>
+
+    <div class="input-container" style="padding-top: 6%;">
+        <p id="total" style="margin-left: 6%;"></p>
+        <div class="button-container">
+          <button type="button"><img src="./btn_imgs/filter.png" alt="" width="17px" onclick="alert('filter')"></button>
+          <button type="button"><img src="./btn_imgs/add.png" alt="" width="17px" onclick="add_table()"></button>
+          <button type="button" id="modify"><img src="./btn_imgs/modify.png" alt="" width="17px" onclick="modify_table()"></button>
+          <button type="button"><img src="./btn_imgs/delete.png" alt="" width="17px" onclick="deleteRows()"></button>
+        </div>
+    </div>
+
+    <!-- table -->
+    <div class="container">
+      <table id="table" border="0">
+        <thead>
+          <tr>
+            <th>단어</th>
+            <th>사용 여부</th>
+            <th>생성일자</th>
+            <th>수정일자</th>
+          </tr>
+        </thead>
+
+        <tbody style="cursor: pointer;">
+          <tr onclick="javascript:select_table(this);"> <!-- 첫 번째 줄 시작 -->
+            <td>단어1</td>
+            <td>사용여부1</td>
+            <td>2023.7.18 10:15</td>
+            <td>2023.7.18 10:15</td>
+          </tr>
+          <tr onclick="javascript:select_table(this);"> <!-- 두 번째 줄 시작 -->
+              <td>단어2</td>
+              <td>사용여부2</td>
+              <td>2023.8.20 13:12</td>
+              <td>2023.8.20 13:12</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <script>
+// 0. 검색 결과 개수
+      var table = document.getElementById('table');
+      var rowCnt = table.tBodies[0].rows.length;
+      document.getElementById("total").innerHTML = "총검색(" + rowCnt + ")";
+
+
+
+  // 1. 검색창 관련
+      // URL 파라미터에서 검색어 값 가져오기
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchKeyword = urlParams.get('query');
+  
+      // 검색어 값이 있을 경우, 입력창에 설정하기
+      if (searchKeyword) {
+        document.getElementById("searchInput").value = decodeURIComponent(searchKeyword);
+      }
+
+
+
+  // 2. 표 선택
+      var selectedRows = []; // 선택된 행들을 저장할 배열
+      function select_table(target) {
+        var tbody = target.parentNode;   // target: 선택한 행, parentNode: 해당 행이 속한 tbody 요소
+        var trs = tbody.getElementsByTagName('tr');   // 테이블의 모든 행 저장
+
+        var backColor = "#ffffff";
+        var textColor = "black";
+        var selectBackColor = "#D9D9D9";
+        var secletTextColor = "#000000";
+
+        if (!target.classList.contains('selected')) {
+          // 클릭한 행이 이미 선택된 행이 아니면 추가
+          target.style.backgroundColor = selectBackColor;
+          target.style.color = secletTextColor;
+          target.classList.add('selected');
+          // 이미 선택된 행인지 확인 후 추가
+          if (selectedRows.indexOf(target) === -1) {
+            selectedRows.push(target);
+          }
+        } else {
+          // 클릭한 행이 이미 선택된 행이면 해제
+          target.style.backgroundColor = backColor;
+          target.style.color = textColor;
+          target.classList.remove('selected');
+          var index = selectedRows.indexOf(target);
+          if (index !== -1) {   // 선택된 행이 배열에 있다면, 해당 행 배열에서 제거
+            selectedRows.splice(index, 1);
+          }
+        }
+      console.log(selectedRows)
+    }
+
+      var now = new Date();	// 현재 날짜 및 시간
+      var year = now.getFullYear();
+      var month = now.getMonth();
+      var date = now.getDate();
+      var hours = now.getHours();
+      var minutes = now.getMinutes();
+
+
+
+    // 3. 표 추가
+      function add_table() {
+        var table = document.getElementById('table');
+        var rowCount = table.rows.length;
+
+        var newRow = table.insertRow(1);
+
+        // 각 셀에 데이터 추가
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        var cell3 = newRow.insertCell(2);
+        var cell4 = newRow.insertCell(3);
+
+        // 새로운 행에 기본값으로 추가
+        cell1.innerHTML = '<input type="text" onkeydown="checkEnter(event, this)" style="font-size: x-small" placeholder="단어">';
+        cell2.innerHTML = '<input type="text" onkeydown="checkEnter(event, this)" style="font-size: x-small" placeholder="단어">';
+        cell3.innerHTML = year + "/" + month + "/" + date + " " + hours + ":" + minutes;
+        cell4.innerHTML = year + "/" + month + "/" + date + " " + hours + ":" + minutes;;
+
+        // 클릭 이벤트 추가
+        newRow.onclick = function() {
+          select_table(newRow);
+        };
+      }
+
+      // 엔터 키를 누를 때 입력창의 값을 저장하고 텍스트로 변경하는 함수
+      function checkEnter(event) {
+        if (event.key === 'Enter') {
+          var inputs = document.querySelectorAll('#table input[type="text"]');
+          for (var i = 0; i < inputs.length; i++) {
+            var value = inputs[i].value.trim(); // 입력값의 앞뒤 공백을 제거하기 위해 trim() 사용
+
+            if (value === "") {
+              alert("값을 입력하세요!");
+              return; // 하나라도 입력값이 비어있다면 추가 중단
+            }
+          }
+
+          var cells = event.target.parentNode.parentNode.cells;
+          for (var i = 0; i < cells.length; i++) {
+            cells[i].innerHTML = inputs[i].value;
+          }
+        }
+      }
+
+      // 3-1. 행 추가 내용 적용
+      function applyChanges(cells, index, value) {
+        cells[index].innerHTML = value;
+      }
+
+
+
+  // 4. 표 수정
+      function modify_table() {
+        var table = document.getElementById('table');
+
+        // 선택된 행이 1개일 때만 수정 가능
+        if (selectedRows.length === 1) {
+          var selectedRow = selectedRows[0]; // 첫 번째 선택된 행만 사용하도록
+          var cells = selectedRow.cells;
+
+          // 기존 값 저장
+          var word = cells[0].innerText;
+          var usage = cells[1].innerText;
+          var createDate = cells[2].innerText;
+          var modifyDate = cells[3].innerText;
+
+          // 수정할 내용을 입력창으로 변경
+          cells[0].innerHTML = '<input type="text" style="font-size: x-small" value='+ word +'>';
+          cells[1].innerHTML = '<input type="text" style="font-size: x-small" value='+ usage +' ">';
+
+          // 선택한 행의 입력창에서 수정 완료 시, 다시 텍스트로 변경하도록 함
+          cells[0].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+              saveChanges(cells, word, usage);
+            }
+          });
+          cells[1].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+              saveChanges(cells, word, usage);
+            }
+          });
+          selectedRow.classList.remove('selected');   // 행의 선택 표시 제거
+
+        // 1개 이상 선택 시
+        } else if (selectedRows.length >= 1) {
+          alert("1개의 행만 선택해주세요.");
+          for (var i = 0; i < selectedRows.length; i++) {
+            selectedRows[i].classList.remove('selected');
+          }
+
+        // 하나도 선택하지 않았을 때
+        } else {
+          alert("1개의 행을 선택해주세요")
+          selectedRow.classList.remove('selected');
+        }
+      }
+
+      // 4-1. 행 수정 내용 저장
+      function saveChanges(cells, word, usage) {
+        // 입력창의 값을 텍스트로 변경하여 저장
+        final_word = cells[0].getElementsByTagName('input')[0].value;
+        final_usage = cells[1].getElementsByTagName('input')[0].value;
+        cells[0].innerHTML = final_word;
+        cells[1].innerHTML = final_usage;
+        // word와 usage가 변경될 때만 modifyDate 값을 변경
+        if (word !== final_word || usage !== final_usage) {
+          cells[3].innerHTML = year + "/" + month + "/" + date + " " + hours + ":" + minutes;
+        }
+      }
+
+
+  // 5. 표 삭제
+      function deleteRows() {
+        var table = document.getElementById('table');
+
+        if (selectedRows.length <= 0) alert("1개 이상의 행을 선택해주세요.")
+        else {
+          // 선택된 행들 삭제
+          for (var i = 0; i < selectedRows.length; i++) {
+            table.deleteRow(selectedRows[i].rowIndex);
+          }
+          selectedRows = [];
+        }
+      }
+
+      
+    </script>
+</body>
+</html>
