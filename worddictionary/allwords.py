@@ -44,7 +44,6 @@ for form, tag, start, len in result:
     bef_tag = 'NN'
     cnt += 1
 
-
   # 관형격 조사일 때 ex)신의성실의 원칙
   elif tag == 'JKG' and bef_tag == "NN":
     temp_word += form + " "
@@ -62,10 +61,15 @@ for form, tag, start, len in result:
   # 더 고려할 것 : 몇 개의 형태소로 이루어진 것만 넣을까, 1글자거나 긴 단어는 뺄까, 1 <= form_num <= 4 and ~의 경우 빼기
   else:
     # if temp_word not in made_words:
-    if bef_tag == 'NN':
+    del len
+    if bef_tag == 'NN' and len(temp_word) > 1:
       made_words.append(temp_word)
-      print(temp_word)
+      # print(temp_word)
     temp_word = ""
     bef_tag = ""
     bef_loc = 0
     form_num = 0
+
+made_words_set = set(made_words)
+final_words_list = list(made_words_set)
+print(final_words_list) # 여기에 단어들 담김
