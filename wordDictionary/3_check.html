@@ -1,13 +1,17 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check</title>
+
   <style>
     .container {display: flex; flex-direction: column; align-items: center; font-size: x-small;}
 
     .input-container {display: flex; gap: 10px; font-size: x-small;}
 
     table {width: 90%; border-top: 1px solid #444444; border-collapse: collapse; text-align: center;}
-  th, td {border-bottom: 1px solid #444444; padding: 20px; text-align: center;}
+    th, td {border-bottom: 1px solid #444444; padding: 20px; text-align: center;}
   
     p {display: flex; justify-content: center;}
 
@@ -31,22 +35,21 @@
         to { opacity: 1; }
     }
   </style>
-
-  <title>Search result</title>
 </head>
 
 
 
 <body>
-  <div class="container" style="padding-top: 7%;">
+  <div class="container" style="padding-top: 5%;">
     <div class="input-container">
-        <input type="text" id="searchInput" style="width: 500px; height: 25px; font-size: x-small;" />
-        <input type="submit" value="검색" style="width: 50px; height: 30px;" />  
+      <h1 id="select-word">키워드</h1>
+        <!-- <input type="text" id="searchInput" style="width: 500px; height: 25px; font-size: x-small;" />
+        <input type="submit" value="검색" style="width: 50px; height: 30px;" />   -->
     </div>
   </div>
 
   
-  <div class="input-container" style="padding-top: 6%;">
+  <div class="input-container" style="padding-top: 5%;">
       <p id="total" style="margin-left: 6%;"></p>
       <div class="button-container">
         <button class="icon-button" id="open-modal-btn"><img src="./btn_imgs/filter.png" alt="필터" width="17px"></button>
@@ -140,21 +143,29 @@
 
 
 // 0. 검색 결과 개수
-      var table = document.getElementById('table');
-      var rowCnt = table.tBodies[0].rows.length;
-      document.getElementById("total").innerHTML = "총검색(" + rowCnt + ")";
+      function rowCount() {
+        var table = document.getElementById('table');
+        var rowCnt = table.tBodies[0].rows.length;
+        document.getElementById("total").innerHTML = "총검색(" + rowCnt + ")";
+      }
+
+      // 초기 검색 결과 개수 표시
+      window.onload = function () {
+        rowCount();
+      };
 
 
 
-  // 1. 검색창 관련
+  // 1. 키워드 수집 관련
       // URL 파라미터에서 검색어 값 가져오기
       const urlParams = new URLSearchParams(window.location.search);
-      const searchKeyword = urlParams.get('query');
+      const saveKeyword = urlParams.get('query');
   
-      // 검색어 값이 있을 경우, 입력창에 설정하기
-      if (searchKeyword) {
-        document.getElementById("searchInput").value = decodeURIComponent(searchKeyword);
+      // 검색어 값이 있을 경우, 키워드 부분에 넣기
+      if (saveKeyword) {
+        document.getElementById("select-word").textContent = decodeURIComponent(saveKeyword);
       }
+
 
 
   // 2. 표 선택
@@ -224,12 +235,16 @@
           select_table(newRow);
           activateModifyButton(false);   // 수정 버튼 비활성화
         };
+
+        // 총개수 업데이트
+        rowCount()
+        console.log("개수 업데이트")
       }
 
-      // 3-1. 엔터 키를 누르면, 입력창의 값을 저장하고 텍스트로 변경하는 함수
+      // 3-1. 엔터 키를 누르면, 입력창의 값을 저장
       function addSave(event) {
         if (event.key === 'Enter') {
-          var inputs = document.querySelectorAll('#table input[type="text"]');
+          var inputs = document.querySelectorAll('#table input[type="text"]');   // 테이블 안의 모든 input 요소 선택
           for (var i = 0; i < inputs.length; i++) {
             var value = inputs[i].value.trim();
 
@@ -238,8 +253,9 @@
               return; // 하나라도 입력값이 비어있다면 중단
             }
           }
-
-          var cells = event.target.parentNode.parentNode.cells;
+          
+          // 입력창의 값을 텍스트로 변경
+          var cells = event.target.parentNode.parentNode.cells;   // 현재 입력창이 위치한 행의 모든 셀
           for (var i = 0; i < cells.length; i++) {
             cells[i].innerHTML = inputs[i].value;
           }
@@ -307,7 +323,7 @@
         }
       }
 
-      // 4-2. 행 추가하는 중에 수정 버튼 비활성화 함수
+      // 4-2. 행 추가하는 중에 수정 버튼 비활성화
       function activateModifyButton(enable) {   // enable에 따라 수정 버튼을 활성화 또는 비활성화
         const modifyBtn = document.querySelector('.icon-button img[alt="수정"]');
         modifyBtn.onclick = enable ? modify_table : function() {
