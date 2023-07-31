@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keywords</title>
+
+    <style>
+        .container {display: flex; flex-direction: column; align-items: center; justify-content: center;}
+
+        table {width: 90%; border-collapse: collapse; text-align: center; font-size: x-small;}
+        td {padding: 20px; text-align: center; font-size: x-small;}
+    </style>
+</head>
+
+
+
+<body>
+    <div class="container" style="padding-top: 5%;">
+        <h1>Keywords</h1>
+    </div>
+
+
+
+    <!-- 테이블 -->
+    <div class="container"style="padding-top: 2%;">
+        <table id="table" border="0">
+          <thead>
+            <tr>
+              <th>키워드</th>
+            </th>
+          </thead>
+  
+          <!-- 크롤링된 단어들 넣기 -->
+          <tbody style="cursor: pointer;">
+            {% for row in rows %}
+              <tr> <!-- 첫 번째 줄 시작 -->
+                <td>{{row.0}}</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+
+
+      <script>
+        // 테이블 값 가져오기
+        document.getElementById("table").addEventListener("click", function(event) {
+            const click = event.target;   // td
+            const tdValue = click.textContent;   // td값
+
+        // 검색어를 사용하여 원하는 페이지로 이동
+        window.location.href = "check?query=" + encodeURIComponent(tdValue);
+        });
+      </script>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyword Collection</title>
+
+  <style>
+    .container {display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;}
+    /* vh: 뷰포트(viewport)의 단위로, 웹 페이지가 표시되는 화면의 영역을 의미 */
+
+    .input-container {display: flex; gap: 10px;}
+  </style>
+</head>
+
+
+
+<body>
+  <div class="container">
+    <h1>Keyword Collection</h1>
+    <form id="searchForm">
+      <div class="input-container">
+        <input type="text" id="searchInput" placeholder="수집할 단어를 입력해주세요." style="width: 500px; height: 25px; font-size: x-small;" />
+        <input type="submit" value="저장" style="width: 50px; height: 30px; font-size: x-small;" />
+      </div>
+    </form>
+  </div>
+
+
+  <script>
+    document.getElementById("searchForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // 기본 제출 동작 막기
+
+        // 입력창의 값을 가져와서 변수에 저장 -> 크롤링할 단어!!!
+        var saveKeyword = document.getElementById("searchInput").value;
+
+        // 검색어를 사용하여 원하는 페이지로 이동
+        window.location.href = "check?query=" + encodeURIComponent(saveKeyword);
+    });
+</script>
+
+</body>
+</html>
