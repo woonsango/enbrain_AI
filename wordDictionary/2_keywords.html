@@ -49,6 +49,14 @@
 
 
       <script>
+        // 테이블 값 가져오기
+        document.getElementById("table").addEventListener("click", function(event) {
+            const click = event.target;   // td
+            const tdValue = click.textContent;   // td값
+
+        // 검색어를 사용하여 원하는 페이지로 이동
+        window.location.href = "3_check.html?query=" + encodeURIComponent(tdValue);
+        });
       </script>
 
 </body>
