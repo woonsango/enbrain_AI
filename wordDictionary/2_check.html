@@ -157,8 +157,7 @@
       }
 
 
-
-  // 2. 표 선택   -> 다른 기능 중에는 선택되지 않도록
+  // 2. 표 선택
       var selectedRows = []; // 선택된 행들을 저장할 배열
       function select_table(target) {
         var tbody = target.parentNode;   // target: 선택한 행 / parentNode: 해당 행이 속한 tbody 요소
@@ -215,19 +214,20 @@
         var cell4 = newRow.insertCell(3);
 
         // 새로운 행에 기본값으로 추가
-        cell1.innerHTML = '<input type="text" onkeydown="checkEnter(event, this)" style="font-size: x-small" placeholder="단어">';
-        cell2.innerHTML = '<input type="text" onkeydown="checkEnter(event, this)" style="font-size: x-small" placeholder="단어">';
+        cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
+        cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
         cell3.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
         cell4.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;;
 
         // 클릭 이벤트 추가
         newRow.onclick = function() {
           select_table(newRow);
+          activateModifyButton(false);   // 수정 버튼 비활성화
         };
       }
 
-      // 엔터 키를 누를 때 입력창의 값을 저장하고 텍스트로 변경하는 함수
-      function checkEnter(event) {
+      // 3-1. 엔터 키를 누르면, 입력창의 값을 저장하고 텍스트로 변경하는 함수
+      function addSave(event) {
         if (event.key === 'Enter') {
           var inputs = document.querySelectorAll('#table input[type="text"]');
           for (var i = 0; i < inputs.length; i++) {
@@ -246,14 +246,9 @@
         }
       }
 
-      // 3-1. 행 추가 내용 적용
-      function applyChanges(cells, index, value) {
-        cells[index].innerHTML = value;
-      }
 
 
-
-  // 4. 표 수정   -> 수정 내용이 없이 엔터치면, 수정날짜 바뀌지 않고 그대로 저장하게
+  // 4. 표 수정
       function modify_table() {
         var table = document.getElementById('table');
 
@@ -275,12 +270,12 @@
           // 선택한 행의 입력창에서 수정 완료 시, 다시 텍스트로 변경하도록 함
           cells[0].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
-              saveChanges(cells, word, usage);
+              modifySave(cells, word, usage);
             }
           });
           cells[1].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
-              saveChanges(cells, word, usage);
+              modifySave(cells, word, usage);
             }
           });
           selectedRow.classList.remove('selected');   // 행의 선택 표시 제거
@@ -300,7 +295,7 @@
       }
 
       // 4-1. 행 수정 내용 저장
-      function saveChanges(cells, word, usage) {
+      function modifySave(cells, word, usage) {
         // 입력창의 값을 텍스트로 변경하여 저장
         final_word = cells[0].getElementsByTagName('input')[0].value;
         final_usage = cells[1].getElementsByTagName('input')[0].value;
@@ -311,6 +306,16 @@
           cells[3].innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
         }
       }
+
+      // 4-2. 행 추가하는 중에 수정 버튼 비활성화 함수
+      function activateModifyButton(enable) {   // enable에 따라 수정 버튼을 활성화 또는 비활성화
+        const modifyBtn = document.querySelector('.icon-button img[alt="수정"]');
+        modifyBtn.onclick = enable ? modify_table : function() {
+          modifyBtn.onclick = null
+          alert("행을 추가하는 중에는 수정이 불가능합니다.");
+        };
+      }
+
 
 
   // 5. 표 삭제
