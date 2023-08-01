@@ -125,7 +125,7 @@
 
 
     <script>
-// 모달창
+  // 모달창
       // 모달 열기
       const openModalBtn = document.getElementById('open-modal-btn');
       const modal = document.getElementById('modal');
@@ -142,7 +142,7 @@
 
 
 
-// 0. 검색 결과 개수
+  // 0. 검색 결과 개수
       function rowCount() {
         var table = document.getElementById('table');
         var rowCnt = table.tBodies[0].rows.length;
@@ -344,6 +344,10 @@
           for (var i = 0; i < selectedRows.length; i++) {
             table.deleteRow(selectedRows[i].rowIndex);
           }
+
+          // 총개수 업데이트
+          rowCount()
+          console.log("개수 업데이트")
           selectedRows = [];
         }
       }
