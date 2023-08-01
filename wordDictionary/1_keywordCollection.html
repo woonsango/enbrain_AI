@@ -28,14 +28,23 @@
 
 
   <script>
+    // 현재 날짜 및 시간
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = now.getMonth()+1 ;
+    var date = now.getDate();
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
+
     document.getElementById("searchForm").addEventListener("submit", function(event) {
-        event.preventDefault(); // 기본 제출 동작 막기
+      var keywordsCreationDate = year + "." + month + "." + date + " " + hours + ":" + minutes;   // keywords.html에서의 사용될 생성일자
+      event.preventDefault(); // 기본 제출 동작 막기
 
-        // 입력창의 값을 가져와서 변수에 저장 -> 크롤링할 단어!!!
-        var saveKeyword = document.getElementById("searchInput").value;
+      // 입력창의 값을 가져와서 변수에 저장 -> 크롤링할 단어!!!
+      var saveKeyword = document.getElementById("searchInput").value;
 
-        // 검색어를 사용하여 원하는 페이지로 이동
-        window.location.href = "3_check.html?query=" + encodeURIComponent(saveKeyword);
+      // 검색어를 사용하여 원하는 페이지로 이동
+      window.location.href = "3_check.html?query=" + encodeURIComponent(saveKeyword);
     });
 </script>
 
