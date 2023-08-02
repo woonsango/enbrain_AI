@@ -1,4 +1,5 @@
 import requests
+from bs4 import BeautifulSoup
 from gensim import models
 from kiwipiepy import Kiwi
 from sklearn.metrics.pairwise import cosine_similarity
@@ -8,15 +9,19 @@ from sklearn.metrics.pairwise import cosine_similarity
 # Wikipedia content crawling
 def getWikiData(search):
     wiki_url = "https://ko.wikipedia.org/wiki/" + search
-    url = "https://ko.wikipedia.org/w/api.php?action=parse&parse&page=" + search + "&prop=wikitext&formatversion=2&format=json"
     headers = {'Content-Type': 'application/json'}
-
-    response = requests.get(url, headers=headers)
-    return response.json(), wiki_url
+    response = requests.get(wiki_url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        page_title = soup.select_one('span.mw-page-title-main')
+        search = page_title.text
+        url = "https://ko.wikipedia.org/w/api.php?action=parse&parse&page=" + search + "&prop=wikitext&formatversion=2&format=json"
+        response = requests.get(url, headers=headers)
+    return response.json(), wiki_url, search
 
 # Tokenization of the synopsis
 def tokenizing(text):
-    text_data, url = getWikiData(text)
+    text_data, url, text = getWikiData(text)
     kiwi = Kiwi()
     kiwi.prepare()
     index = text_data['parse']['wikitext'].find("== 각주 ==")
@@ -24,7 +29,7 @@ def tokenizing(text):
           text_data['parse']['wikitext'] = text_data['parse']['wikitext'][:index]
     text_wikitext = text_data['parse']['wikitext']
     result = kiwi.tokenize(text_wikitext)
-    return result, url, text_data, text_wikitext
+    return result, url, text_data, text_wikitext, text
 
 # Extracting words and their cosine similarity values
 def make_word(result, text_data):
@@ -95,7 +100,7 @@ def make_word(result, text_data):
 
 # 키워드와 관련된 유사도 높은 결과 단어 추출
 def getWord(text):
-    content, url, text_data, text_wikitext = tokenizing(text)
+    content, url, text_data, text_wikitext, text = tokenizing(text)
     cosine, made_words = make_word(content, text_data)
     made_words_set = set(made_words)
     final_words_list = list(made_words_set)
@@ -106,14 +111,16 @@ def getWord(text):
         count = 0
         if token in ko_model.wv.key_to_index:
             cosine_sim = cosine_similarity([ko_model.wv[text_data['parse']['title']]], [ko_model.wv[token]])
-            if cosine_sim > 0.15 and len(token) >1:
+            if cosine_sim > 0.16 and len(token) >1:
+                # print(f'{token}: {cosine_sim}')
                 similar_word.append([token,url])
     cnt = 0
     for token in cosine:
         if cosine[token] > 0.12 and len(token) > 1:
             # count = text_wikitext.count(token[0])
+            # print(f'{token}: {cosine[token]}')
             similar_word.append([token, url])
     result[text] = similar_word
     return result
 
-result = getWord("민법")
+result = getWord("한국사")
