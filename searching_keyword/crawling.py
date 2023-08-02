@@ -107,13 +107,11 @@ def getWord(text):
         if token in ko_model.wv.key_to_index:
             cosine_sim = cosine_similarity([ko_model.wv[text_data['parse']['title']]], [ko_model.wv[token]])
             if cosine_sim > 0.15 and len(token) >1:
-                print(f'{token}: {cosine_sim}')
                 similar_word.append([token,url])
     cnt = 0
     for token in cosine:
         if cosine[token] > 0.12 and len(token) > 1:
             # count = text_wikitext.count(token[0])
-            print(f'{token}: {cosine[token]}')
             similar_word.append([token, url])
     result[text] = similar_word
     return result
