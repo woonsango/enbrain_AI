@@ -1,3 +1,4 @@
+
 {% load static %}
 
 <!DOCTYPE html>
@@ -98,7 +99,6 @@
 
     <!-- 테이블 -->
     <div class="container">
-      <!-- {{rows}} -->
       <table id="table" border="0">
         <thead>
           <tr>
@@ -124,7 +124,7 @@
 
 
     <script>
-// 모달창
+  // 모달창
       // 모달 열기
       const openModalBtn = document.getElementById('open-modal-btn');
       const modal = document.getElementById('modal');
@@ -141,11 +141,11 @@
 
 
 
-// 0. 검색 결과 개수
+  // 0. 검색 결과 개수
       function rowCount() {
         var table = document.getElementById('table');
         var rowCnt = table.tBodies[0].rows.length;
-        document.getElementById("total").innerHTML = "총검색(" + rowCnt + ")";
+        document.getElementById("total").innerHTML = "총 단어 개수: " + rowCnt;
       }
 
       // 초기 검색 결과 개수 표시
@@ -210,7 +210,7 @@
       var hours = now.getHours();
       var minutes = now.getMinutes();
 
-    // 3. 표 추가   -> 취소 기능 만들기
+  // 3. 표 추가   -> 취소 기능 만들기
       function add_table() {
         var table = document.getElementById('table');
         var rowCount = table.rows.length;
@@ -235,9 +235,8 @@
           activateModifyButton(false);   // 수정 버튼 비활성화
         };
 
-        // 총개수 업데이트
+        // 총 단어 개수 업데이트
         rowCount()
-        console.log("개수 업데이트")
       }
 
       // 3-1. 엔터 키를 누르면, 입력창의 값을 저장
@@ -333,7 +332,7 @@
 
 
 
-  // 5. 표 삭제
+  // 5. 행 삭제
       function deleteRows() {
         var table = document.getElementById('table');
 
@@ -344,6 +343,9 @@
             table.deleteRow(selectedRows[i].rowIndex);
           }
           selectedRows = [];
+
+          // 총 단어 개수 업데이트
+          rowCount()
         }
       }
     </script>

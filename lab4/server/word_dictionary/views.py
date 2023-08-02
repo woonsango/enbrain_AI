@@ -14,10 +14,13 @@ def check(request):
         # query문 실행(keyword table 가져오기)
         cursor.execute(f"""SELECT d.word, d.usable, cast(d.created_date as char), cast(d.modified_date as char)
                         FROM mydb.keyword_dictionary d
-                        join mydb.keyword k on d.keyword_id = k.id ;
-                        where keyword_id = {8};""")
+                        join mydb.keyword k on d.keyword_id = k.id
+                        where k.keyword = '{word}';""")
         # query문 결과 모두를 tuple로 저장
         rows = cursor.fetchall()
+
+    print(word)
+    print(rows)
 
     print(rows)
 
@@ -35,10 +38,10 @@ def keywords(request):
     #db 불러오기
     with connection.cursor() as cursor:
         # query문 실행(keyword table 가져오기)
-        cursor.execute("""SELECT keyword 
+        cursor.execute("""SELECT keyword, cast(created_date as char), cast(modified_date as char)
                         FROM keyword ;""")
         # query문 결과 모두를 tuple로 저장
         rows = cursor.fetchall()
         # print(rows)
 
-    return render(request, 'main/keywords.html', {"rows":rows})
+    return render(request, 'main/keywords.html', {"words":rows})

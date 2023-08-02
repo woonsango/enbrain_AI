@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,10 +8,36 @@
     <title>Keywords</title>
 
     <style>
-        .container {display: flex; flex-direction: column; align-items: center; justify-content: center;}
+        .container {display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: x-small;}
 
-        table {width: 90%; border-collapse: collapse; text-align: center; font-size: x-small;}
-        td {padding: 20px; text-align: center; font-size: x-small;}
+        .input-container {display: flex; gap: 10px; font-size: x-small;}
+
+        table {width: 90%; border-top: 1px solid #444444; border-collapse: collapse; text-align: center;}
+        th, td {border-bottom: 1px solid #444444; padding: 20px; text-align: center;}
+
+        p {display: flex; justify-content: center;}
+
+        .button-container {display: flex; justify-content: flex-end; gap: 1%; flex: 1; margin-right: 6%;}   /* flex: 1; -> 남은 공간을 모두 차지하도록 설정 */
+        .icon-button {background-color: transparent; border: none; cursor: pointer; width: 17px;}
+
+        .move-button {border: none; border-radius: 10px; min-height: 25px; min-width: 40px; font-size: x-small;}
+
+        /* 모달 스타일 */
+        .date-container {display: flex; align-items: center;}
+
+        .modal {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);}
+
+        .modal-content {background-color: #ffffff; padding: 20px; border-radius: 5px; max-width: 300px; margin: 100px auto; white-space: nowrap;}
+
+        .close-btn {color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;}
+        .close-btn:hover {color: #000000;}
+
+        /* 모달 표시 애니메이션 */
+        .modal.show {display: block; animation: fadeIn 0.3s;}
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 
@@ -21,39 +49,171 @@
     </div>
 
 
+    <div class="input-container" style="padding-top: 5%;">
+      <p id="total" style="margin-left: 6%;"></p>
+      <div class="button-container">
+        <button class="icon-button" id="open-modal-btn"><img src="{% static 'images/btn_imgs/filter.png' %}" alt="필터" width="17px"></button>
+        <button class="icon-button"><img src="{% static 'images/btn_imgs/delete.png' %}" alt="삭제" width="17px" onclick="deleteRows()"></button>
+      </div>
+  </div>
+
+
+    <!-- 모달창 -->
+  <div class="input-container">
+    <div id="modal" class="modal">
+      <div class="modal-content">
+          <span class="close-btn" id="close-modal-btn">&times;</span>
+          <label for="add_date">생성일자</label>
+          <div class="date-container">
+            <input type="date" id="add_date">
+            <p> ~ </p>
+            <input type="date" id="add_date2">
+          </div>
+          <br>
+
+          <label for="modify_date">수정일자</label>
+          <div class="date-container">
+            <input type="date" id="modify_date">
+            <p> ~ </p>
+            <input type="date" id="modify_date2">
+          </div>
+
+          <button id="apply-btn" class="container">적용</button>
+      </div>
+    </div>
+  </div>
+
 
     <!-- 테이블 -->
-    <div class="container"style="padding-top: 2%;">
-        <table id="table" border="0">
-          <thead>
-            <tr>
-              <th>키워드</th>
-            </th>
-          </thead>
-  
-          <!-- 크롤링된 단어들 넣기 -->
-          <tbody style="cursor: pointer;">
-            {% for row in rows %}
-              <tr> <!-- 첫 번째 줄 시작 -->
-                <td>{{row.0}}</td>
-              </tr>
-              {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    <div class="container">
+      <table id="table" border="0">
+        <thead>
+          <tr>
+            <th>키워드</th>
+            <th>생성일자</th>
+            <th>수정일자</th>
+            <th>용어 단어집 이동</th>
+          </tr>
+        </thead>
+
+        <tbody style="cursor: pointer;">
+          {% for row in words %}
+            <tr onclick="javascript:select_table(this);"> <!-- 첫 번째 줄 시작 -->
+              <td>{{row.0}}</td>
+              <td>{{row.1}}</td>
+              <td>{{row.2}}</td>
+              <td><button id="move-btn" class="move-button" onclick="moveCheck(this.parentNode.parentNode)">이동</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
 
 
-      <script>
+    <script>
+  // 페이지 이동
+      function moveCheck(keyword) {
         // 테이블 값 가져오기
-        document.getElementById("table").addEventListener("click", function(event) {
-            const click = event.target;   // td
-            const tdValue = click.textContent;   // td값
+        const tdValue = keyword.querySelector('td:first-child').textContent;   // td값의 첫 번째 (=키워드)
+        console.log("moveCheck")
 
         // 검색어를 사용하여 원하는 페이지로 이동
         window.location.href = "check?query=" + encodeURIComponent(tdValue);
-        });
-      </script>
+      }
+
+
+
+  // 모달창
+      // 모달 열기
+      const openModalBtn = document.getElementById('open-modal-btn');
+      const modal = document.getElementById('modal');
+      openModalBtn.addEventListener('click', () => {modal.classList.add('show');});
+
+      // 모달 닫기
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      closeModalBtn.addEventListener('click', () => {modal.classList.remove('show');});
+
+      // 검색 필터 적용 기능 구현해야 함
+      const applyBtn = document.getElementById('apply-btn');
+      // applyBtn.addEventListener('click', () => {});
+
+
+
+
+// 크롤링 다시 했을 때, 수정 날짜 바뀌게 해야 함
+
+
+
+
+  // 0. 검색 결과 개수
+      function rowCount() {
+        var table = document.getElementById('table');
+        var rowCnt = table.tBodies[0].rows.length;
+        document.getElementById("total").innerHTML = "총 키워드 개수: " + rowCnt;
+      }
+
+      // 초기 검색 결과 개수 표시
+      window.onload = function () {
+        rowCount();
+      };
+
+
+
+
+  // 1. 표 선택
+      var selectedRows = []; // 선택된 행들을 저장할 배열
+      function select_table(target) {
+        var tbody = target.parentNode;   // target: 선택한 행 / parentNode: 해당 행이 속한 tbody 요소
+        var trs = tbody.getElementsByTagName('tr');   // 테이블의 모든 행 저장
+
+        var backColor = "#ffffff";
+        var textColor = "black";
+        var selectBackColor = "#D9D9D9";
+        var secletTextColor = "#000000";
+
+        if (!target.classList.contains('selected')) {
+          // 클릭한 행이 이미 선택된 행이 아니면 추가
+          target.style.backgroundColor = selectBackColor;
+          target.style.color = secletTextColor;
+          target.classList.add('selected');
+          // 이미 선택된 행인지 확인 후 추가
+          if (selectedRows.indexOf(target) === -1) {
+            selectedRows.push(target);
+          }
+        } else {
+          // 클릭한 행이 이미 선택된 행이면 해제
+          target.style.backgroundColor = backColor;
+          target.style.color = textColor;
+          target.classList.remove('selected');
+          var index = selectedRows.indexOf(target);
+          if (index !== -1) {   // 선택된 행이 배열에 있다면, 해당 행 배열에서 제거
+            selectedRows.splice(index, 1);
+          }
+        }
+      console.log(selectedRows)
+    }
+
+
+
+
+  // 2. 행 삭제
+      function deleteRows() {
+        var table = document.getElementById('table');
+
+        if (selectedRows.length <= 0) alert("1개 이상의 행을 선택해주세요.")
+        else {
+          // 선택된 행들 삭제
+          for (var i = 0; i < selectedRows.length; i++) {
+            table.deleteRow(selectedRows[i].rowIndex);
+          }
+          selectedRows = [];
+
+          // 총 키워드 개수 업데이트
+          rowCount()
+        }
+      }
+    </script>
 
 </body>
 </html>
