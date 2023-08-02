@@ -3,22 +3,25 @@ from gensim import models
 from kiwipiepy import Kiwi
 from sklearn.metrics.pairwise import cosine_similarity
 
-ko_model = models.fasttext.load_facebook_model('cc.ko.300.bin')
+# ko_model = models.fasttext.load_facebook_model('cc.ko.300.bin')
 
 # Wikipedia content crawling
 def getWikiData(search):
+    wiki_url = "https://ko.wikipedia.org/wiki/" + search
     url = "https://ko.wikipedia.org/w/api.php?action=parse&parse&page=" + search + "&prop=wikitext&formatversion=2&format=json"
     headers = {'Content-Type': 'application/json'}
 
     response = requests.get(url, headers=headers)
-    return response.json(), url
+    return response.json(), wiki_url
 
 # Tokenization of the synopsis
 def tokenizing(text):
     text_data, url = getWikiData(text)
     kiwi = Kiwi()
     kiwi.prepare()
-    
+    index = text_data['parse']['wikitext'].find("== 각주 ==")
+    if(index != -1):
+          text_data['parse']['wikitext'] = text_data['parse']['wikitext'][:index]
     text_wikitext = text_data['parse']['wikitext']
     result = kiwi.tokenize(text_wikitext)
     return result, url, text_data, text_wikitext
@@ -103,13 +106,16 @@ def getWord(text):
         count = 0
         if token in ko_model.wv.key_to_index:
             cosine_sim = cosine_similarity([ko_model.wv[text_data['parse']['title']]], [ko_model.wv[token]])
-            if cosine_sim > 0.2 and len(token) >1:
+            if cosine_sim > 0.15 and len(token) >1:
+                print(f'{token}: {cosine_sim}')
                 similar_word.append([token,url])
     cnt = 0
     for token in cosine:
-        if cosine[token] > 0.1 and len(token) > 1:
+        if cosine[token] > 0.12 and len(token) > 1:
             # count = text_wikitext.count(token[0])
+            print(f'{token}: {cosine[token]}')
             similar_word.append([token, url])
     result[text] = similar_word
     return result
+
 result = getWord("민법")
