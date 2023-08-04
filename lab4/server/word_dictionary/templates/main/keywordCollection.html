@@ -22,8 +22,15 @@
       <div class="input-container">
         <input type="text" id="searchInput" placeholder="수집할 단어를 입력해주세요." style="width: 500px; height: 25px; font-size: x-small;" />
         <input type="submit" value="저장" style="width: 50px; height: 30px; font-size: x-small;" />
+        <br>
       </div>
     </form>
+    {% if keyword != '' %}
+    <br>
+    <p>success</p>
+    <br>
+    <a href="check?query={{keyword}}">{{keyword}} 관련 단어 보러 가기</a>
+    {% endif %}
   </div>
 
 
@@ -34,9 +41,16 @@
         // 입력창의 값을 가져와서 변수에 저장 -> 크롤링할 단어!!!
         var saveKeyword = document.getElementById("searchInput").value;
 
+
         // 검색어를 사용하여 원하는 페이지로 이동
-        window.location.href = "check?query=" + encodeURIComponent(saveKeyword);
+        window.location.href = "keywordCollection?query=" + encodeURIComponent(saveKeyword);
     });
+    // document.getElementById("move").addEventListener("submit", function(event) {
+    //     event.preventDefault();
+    //     var saveKeyword = document.getElementById("searchInput").value;
+    //     console.log(saveKeyword)
+    //     window.location.href = "check?query=" + encodeURIComponent(saveKeyword);
+    // });
 </script>
 
 </body>

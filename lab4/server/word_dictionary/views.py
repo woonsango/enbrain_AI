@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.db import connection
+from .crawling import getWord
 
 # Create your views here.
 def index(request):
@@ -28,10 +29,46 @@ def check(request):
     return render(request, 'main/check.html', {'rows': rows})
 
 def wordDictionary(request):
+
     return render(request, 'main/wordDictionary.html')
 
 def keywordCollection(request):
-    return render(request, 'main/keywordCollection.html')
+    print(request.GET.get('query'))
+    keyword = ''
+    if request.GET.get('query'):
+        keyword = request.GET.get('query')
+        print(keyword)
+        with connection.cursor() as cursor:
+            cursor.execute(f"""select keyword
+                            from keyword ;""")
+            exit_keyword = [i[0]for i in cursor.fetchall()]
+
+            print(exit_keyword)
+            if keyword in exit_keyword:
+                return render(request, 'main/keywordCollection.html', {"keyword": "이미 존재하는 단어입니다"})
+        crawling_data = getWord(keyword)
+        with connection.cursor() as cursor:
+            cursor.execute(f"""INSERT INTO keyword (keyword, created_date, modified_date)
+                    VALUES ("{keyword}", NOW(), NOW()) ;""")
+            cursor.execute(f"""select id
+                            from keyword
+                            where keyword='{keyword}' ;
+                            """)
+            keyword_id = (cursor.fetchone())[0]
+            print(keyword_id)
+            for data in crawling_data[keyword]:
+                print(data[0])
+                cursor.execute(f"""insert into keyword_dictionary (keyword_id, word, created_date, modified_date)
+                                    values ({keyword_id}, '{data[0]}', NOW(), NOW()) ; """)
+                cursor.execute(f"""select id
+                                from keyword_dictionary
+                                where word = '{data[0]}' ;""")
+                keyword_dictionary_id = (cursor.fetchone())[0]
+                print(data[1])
+                cursor.execute(f"""insert into dictionary_crawling_info (keyword_dictionary_id, url, created_date, modified_date)
+                                values ({keyword_dictionary_id}, '{data[1]}', NOW(), NOW()) ;""")
+
+    return render(request, 'main/keywordCollection.html', {"keyword": keyword})
 
 def keywords(request):
 
