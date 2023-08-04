@@ -6,11 +6,12 @@ def get_search_results(search_query):
     nownum = 2000
     search_url = "https://ko.wikipedia.org/w/index.php?search=" + search_query + "&title=특수:검색&profile=default&fulltext=1&ns0=1&offset=0&limit=2000"
     # limit이 몇 개씩 단어 보여주는지 알려주는거 offset이 시작번호 0으로 하면 처음부터 
-    # 순서 1: 먼저 방문, 한 100개정도 먼저 보여줘 그리고 몇갠지 찾아 그리고 그 숫자 끝날때까지 한 2000개? 씩 한 페이지에 보여주고 단어 크롤링하기
+    # 먼저 2000개 정도 찾고 총 개수 알아낸 다음 그 때까지 과정 반복
     
     response = requests.get(search_url)
     soup = BeautifulSoup(response.text, "html.parser")
 
+    # 먼저 단어 총 개수 알아내기
     res_num = soup.find('div', class_ = "results-info")
     totalnum = int(res_num['data-mw-num-results-total'])
     
@@ -24,6 +25,7 @@ def get_search_results(search_query):
             title = title_tag['title']
             search_results.append(title)
 
+    # 2번째 검색부터 반복 
     while(nownum < totalnum) :
         nownum = str(nownum) #str
         search_url = "https://ko.wikipedia.org/w/index.php?search=" + search_query + "&title=특수:검색&profile=default&fulltext=1&ns0=1&offset=" + nownum + "&limit=4000"
