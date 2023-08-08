@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,6 +21,12 @@
         .icon-button {background-color: transparent; border: none; cursor: pointer; width: 17px;}
 
         .move-button {border: none; border-radius: 10px; min-height: 25px; min-width: 40px; font-size: x-small;}
+
+        /* 메뉴 */
+        header {height: 75px; padding: 1% 15%; color: #FFFFFF; background: #333333; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
+        li {position: relative; display: inline-block;}
+        li a {color: #FFFFFF; text-align: center; padding: 16px; text-decoration: none;}
+        li a:hover {color: #FFD400;}
 
         /* 모달 스타일 */
         .date-container {display: flex; align-items: center;}
@@ -42,17 +50,30 @@
 
 
 <body>
-    <div class="container" style="padding-top: 5%;">
-        <h1>Keywords</h1>
+<!-- 상단 메뉴 -->
+    <div>
+      <header>
+        <h2>Word Dictionary</h2>
+        <nav>
+          <ul>
+            <li><a href="/keywordCollection">Keyword Collection</a></li>
+            <li><a href="/keywords">Keywords</a></li>
+          </ul>
+        </nav>
+      </header>
     </div>
+
+
+    <div style="display: flex; align-items: center; justify-content: center; padding-top: 5%;">
+      <h1>Keywords</h1>
+  </div>
 
 
     <div class="input-container" style="padding-top: 5%;">
       <p id="total" style="margin-left: 6%;"></p>
       <div class="button-container">
-        <button class="icon-button" id="open-modal-btn"><img src="./btn_imgs/filter.png" alt="필터" width="17px"></button>
-        <button class="icon-button"><img src="./btn_imgs/add.png" alt="추가" width="17px" onclick="add_table()"></button>
-        <button class="icon-button"><img src="./btn_imgs/delete.png" alt="삭제" width="17px" onclick="deleteRows()"></button>
+        <button class="icon-button" id="open-modal-btn"><img src="{% static 'images/btn_imgs/filter.png' %}" alt="필터" width="17px"></button>
+        <button class="icon-button"><img src="{% static 'images/btn_imgs/delete.png' %}" alt="삭제" width="17px" onclick="deleteRows()"></button>
       </div>
   </div>
 
@@ -96,18 +117,14 @@
         </thead>
 
         <tbody style="cursor: pointer;">
-          <tr onclick="javascript:select_table(this);"> <!-- 첫 번째 줄 시작 -->
-            <td>키워드1</td>
-            <td>2023.7.18 10:15</td>
-            <td>2023.7.18 10:15</td>
-            <td><button id="move-btn" class="move-button" onclick="moveCheck(this.parentNode.parentNode)">이동</button></td>
-          </tr>
-          <tr onclick="javascript:select_table(this);"> <!-- 두 번째 줄 시작 -->
-              <td>키워드2</td>
-              <td>2023.8.20 13:12</td>
-              <td>2023.8.20 13:12</td>
+          {% for row in words %}
+            <tr onclick="javascript:select_table(this);"> <!-- 첫 번째 줄 시작 -->
+              <td>{{row.0}}</td>
+              <td>{{row.1}}</td>
+              <td>{{row.2}}</td>
               <td><button id="move-btn" class="move-button" onclick="moveCheck(this.parentNode.parentNode)">이동</button></td>
-          </tr>
+            </tr>
+            {% endfor %}
         </tbody>
       </table>
     </div>
@@ -122,7 +139,10 @@
         console.log("moveCheck")
 
         // 검색어를 사용하여 원하는 페이지로 이동
-        window.location.href = "3_check.html?query=" + encodeURIComponent(tdValue);
+        window.location.href = "check?query=" + encodeURIComponent(tdValue);
+
+        // 세션 스토리지에 데이터 저장 -> history.html에 데이터 넘겨주기 위해..
+        sessionStorage.setItem("keyword", tdValue);
       }
 
 
@@ -200,65 +220,7 @@
 
 
 
-
-    // 현재 날짜 및 시간
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = now.getMonth()+1 ;
-    var date = now.getDate();
-    var hours = now.getHours();
-    var minutes = now.getMinutes();
-
-    var button;   // 버튼 활성화를 위한 변수
-
-// 2. 행 추가   -> 취소 기능 만들기
-    function add_table() {
-      var table = document.getElementById('table');
-
-      var newRow = table.insertRow(1);
-
-      // 각 셀에 데이터 추가
-      var cell1 = newRow.insertCell(0);
-      var cell2 = newRow.insertCell(1);
-      var cell3 = newRow.insertCell(2);
-      var cell4 = newRow.insertCell(3);
-
-      // 새로운 행에 기본값으로 추가
-      cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
-      cell2.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
-      cell3.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
-      cell4.innerHTML = '<button id="move-btn" class="move-button" onclick="moveCheck(this.parentNode.parentNode)">이동</button>';
-
-      button = newRow.querySelector('.move-button');
-      button.disabled = true;
-
-      // 총 단어 개수 업데이트
-      rowCount()
-    }
-
-    // 3-1. 엔터 키를 누르면, 입력창의 값을 저장
-    function addSave(event, input) {
-      if (event.key === 'Enter') {
-        var value = input.value.trim();
-
-        if (value === "") {
-          alert("값을 입력하세요!");
-          return;
-        }
-        
-        // 입력창의 값을 텍스트로 변경
-        var cells = input.parentNode.parentNode.cells; // 현재 입력창이 위치한 행의 모든 셀
-        cells[0].textContent = value;
-
-        // 이동 버튼 활성화
-        button.disabled = false;
-      }
-    }
-
-
-
-
-  // 3. 행 삭제
+  // 2. 행 삭제
       function deleteRows() {
         var table = document.getElementById('table');
 

@@ -1,0 +1,416 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check</title>
+
+  <style>
+    .container {display: flex; flex-direction: column; align-items: center; font-size: x-small;}
+
+    .input-container {display: flex; gap: 10px; font-size: x-small;}
+
+    table {width: 90%; border-top: 1px solid #444444; border-collapse: collapse; text-align: center;}
+    th, td {border-bottom: 1px solid #444444; padding: 20px; text-align: center;}
+  
+    p {display: flex; justify-content: center;}
+
+    .button-container {display: flex; justify-content: flex-end; gap: 1%; flex: 1; margin-right: 6%;}   /* flex: 1; -> 남은 공간을 모두 차지하도록 설정 */
+    .icon-button {background-color: transparent; border: none; cursor: pointer; width: 17px;}
+
+    /* 모달 스타일 */
+    .date-container {display: flex; align-items: center;}
+
+    .modal {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);}
+
+    .modal-content {background-color: #ffffff; padding: 20px; border-radius: 5px; max-width: 300px; margin: 100px auto; white-space: nowrap;}
+
+    .close-btn {color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;}
+    .close-btn:hover {color: #000000;}
+
+    .move-button {border: none; border-radius: 10px; min-height: 25px; min-width: 40px; font-size: x-small;}
+
+    /* 메뉴 */
+    header {height: 75px; padding: 1% 15%; color: #FFFFFF; background: #333333; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
+    li {position: relative; display: inline-block;}
+    li a {color: #FFFFFF; text-align: center; padding: 16px; text-decoration: none;}
+    li a:hover {color: #FFD400;}
+
+    /* 모달 표시 애니메이션 */
+    .modal.show {display: block; animation: fadeIn 0.3s;}
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+  </style>
+</head>
+
+
+
+<body>
+  <!-- 상단 메뉴 -->
+  <div>
+    <header>
+      <h2>Word Dictionary</h2>
+      <nav>
+        <ul>
+          <li><a href="/keywordCollection">Keyword Collection</a></li>
+          <li><a href="/keywords">Keywords</a></li>
+        </ul>
+      </nav>
+    </header>
+  </div>
+
+
+  <div class="container" style="padding-top: 5%;">
+    <div class="input-container">
+      <h1 id="select-word">키워드</h1>
+    </div>
+  </div>
+
+  
+  <div class="input-container" style="padding-top: 5%;">
+      <p id="total" style="margin-left: 6%;"></p>
+      <div class="button-container">
+        <button class="icon-button" id="open-modal-btn"><img src="{% static 'images/btn_imgs/filter.png' %}" alt="필터" width="17px"></button>
+        <button class="icon-button"><img src="{% static 'images/btn_imgs/add.png' %}" alt="추가" width="17px" onclick="add_table()"></button>
+        <button class="icon-button"><img src="{% static 'images/btn_imgs/modify.png' %}" alt="수정" width="17px" onclick="modify_table()"></button>
+        <button class="icon-button"><img src="{% static 'images/btn_imgs/delete.png' %}" alt="삭제" width="17px" onclick="deleteRows()"></button>
+      </div>
+  </div>
+
+
+  <!-- 모달창 -->
+  <div class="input-container">
+    <div id="modal" class="modal">
+      <div class="modal-content">
+          <span class="close-btn" id="close-modal-btn">&times;</span>
+          <label for="usage">사용 여부</label><br>
+          <select id="usage">
+              <option value="all">전체</option>
+              <option value="zero">0</option>
+              <option value="one">1</option>
+          </select>
+          <br><br>
+
+          <label for="add_date">생성일자</label>
+          <div class="date-container">
+            <input type="date" id="add_date">
+            <p> ~ </p>
+            <input type="date" id="add_date2">
+          </div>
+          <br>
+
+          <label for="modify_date">수정일자</label>
+          <div class="date-container">
+            <input type="date" id="modify_date">
+            <p> ~ </p>
+            <input type="date" id="modify_date2">
+          </div>
+
+          <button id="apply-btn" class="container">적용</button>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- 테이블 -->
+    <div class="container">
+      <table id="table" border="0">
+        <thead>
+          <tr>
+            <th>단어</th>
+            <th>사용 여부</th>
+            <th>생성일자</th>
+            <th>수정일자</th>
+            <th>히스토리 이동</th>
+          </tr>
+        </thead>
+
+        <tbody style="cursor: pointer;">
+          {% for row in rows %}
+            <tr onclick="javascript:select_table(this);"> <!-- 첫 번째 줄 시작 -->
+              <td>{{row.0}}</td>
+              <td>{{row.1}}</td>
+              <td>{{row.2}}</td>
+              <td>{{row.3}}</td>
+              <td><button id="move-btn" class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+
+    <script>
+  // 새 페이지(히스토리 창)로 이동
+      function moveHistory(keyword) {
+        const open = window.open("about:blank")
+        open.location.href = "/history" 
+      }
+
+
+
+  // 모달창
+      // 모달 열기
+      const openModalBtn = document.getElementById('open-modal-btn');
+      const modal = document.getElementById('modal');
+      openModalBtn.addEventListener('click', () => {modal.classList.add('show');});
+
+      // 모달 닫기
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      closeModalBtn.addEventListener('click', () => {modal.classList.remove('show');});
+
+      // 검색 필터 적용 기능 구현해야 함
+      const applyBtn = document.getElementById('apply-btn');
+      // applyBtn.addEventListener('click', () => {});
+
+
+
+
+  // 0. 검색 결과 개수 함수
+      function rowCount() {
+        var table = document.getElementById('table');
+        var rowCnt = table.tBodies[0].rows.length;
+        document.getElementById("total").innerHTML = "총 단어 개수: " + rowCnt;
+      }
+
+      // 초기 검색 결과 개수 표시
+      window.onload = function () {
+        rowCount();
+      };
+
+
+
+  // 1. 키워드 수집 관련 함수
+      // URL 파라미터에서 검색어 값 가져오기
+      const urlParams = new URLSearchParams(window.location.search);
+      const saveKeyword = urlParams.get('query');
+  
+      // 검색어 값이 있을 경우, 키워드 부분에 넣기
+      if (saveKeyword) {
+        document.getElementById("select-word").textContent = decodeURIComponent(saveKeyword);
+      }
+
+
+
+  // 2. 행 선택 함수
+      var selectedRows = []; // 선택된 행들을 저장할 배열
+
+      function select_table(target) {
+        var tbody = target.parentNode;   // target: 선택한 행 / parentNode: 해당 행이 속한 tbody 요소
+        var trs = tbody.getElementsByTagName('tr');   // 테이블의 모든 행 저장
+
+        var backColor = "#ffffff";
+        var textColor = "black";
+        var selectBackColor = "#D9D9D9";
+        var secletTextColor = "#000000";
+
+        if (!target.classList.contains('selected')) {
+          // 클릭한 행이 이미 선택된 행이 아니면 추가
+          target.style.backgroundColor = selectBackColor;
+          target.style.color = secletTextColor;
+          target.classList.add('selected');
+          // 이미 선택된 행인지 확인 후 추가
+          if (selectedRows.indexOf(target) === -1) {
+            selectedRows.push(target);
+          }
+        } else {
+          // 클릭한 행이 이미 선택된 행이면 해제
+          target.style.backgroundColor = backColor;
+          target.style.color = textColor;
+          target.classList.remove('selected');
+          var index = selectedRows.indexOf(target);
+          if (index !== -1) {   // 선택된 행이 배열에 있다면, 해당 행 배열에서 제거
+            selectedRows.splice(index, 1);
+          }
+        }
+      }
+
+
+
+      // 현재 날짜 및 시간
+      var now = new Date();
+      var year = now.getFullYear();
+      var month = now.getMonth()+1 ;
+      var date = now.getDate();
+      var hours = now.getHours();
+      var minutes = now.getMinutes();
+
+  // 3. 행 추가 함수   -> 취소 기능 만들기
+      function add_table() {
+        var table = document.getElementById('table');
+        var rowCount = table.rows.length;
+
+        var newRow = table.insertRow(1);
+
+        // 각 셀에 데이터 추가
+        var cell1 = newRow.insertCell(0);
+        var cell2 = newRow.insertCell(1);
+        var cell3 = newRow.insertCell(2);
+        var cell4 = newRow.insertCell(3);
+
+        var cancelButton = document.createElement('span');
+        cancelButton.className = 'cancel-button'; // 새로 추가한 클래스
+        cancelButton.innerHTML = 'X';
+        cancelButton.style.color = 'gray';
+        cancelButton.style.marginRight = '20%';
+        cancelButton.addEventListener('click', function () {
+            table.deleteRow(newRow.rowIndex);
+        });
+        cell1.appendChild(cancelButton); // 취소 버튼 추가
+
+        // 새로운 행에 기본값으로 추가
+        var wordInput = document.createElement('input');
+        wordInput.type = 'text';
+        wordInput.className = 'word-input'; // 새로 추가한 클래스
+        wordInput.placeholder = '단어';
+        wordInput.addEventListener('keydown', function (event) {
+            addSave(event, this);
+        });
+        cell1.appendChild(wordInput); // 단어 입력창 추가
+        cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="사용 여부">';
+        cell3.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
+        cell4.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
+
+        // 클릭 이벤트 추가
+        newRow.onclick = function() {
+          select_table(newRow);
+        };
+
+        rowCount()   // 총 단어 개수 업데이트
+      }
+
+      // 3-1. 엔터 키를 누르면, 입력창의 값을 저장
+      function addSave(event) {
+        if (event.key === 'Enter') {
+          var inputs = document.querySelectorAll('#table input[type="text"]');   // 테이블 안의 모든 input 요소 선택
+          for (var i = 0; i < inputs.length; i++) {
+            var value = inputs[i].value.trim();
+
+            if (value === "") {
+              alert("값을 입력하세요!");
+              return; // 하나라도 입력값이 비어있다면 중단
+            }
+          }
+          
+          // 입력창의 값을 텍스트로 변경
+          var cells = event.target.parentNode.parentNode.cells;   // 현재 입력창이 위치한 행의 모든 셀
+          for (var i = 0; i < cells.length; i++) {
+            cells[i].innerHTML = inputs[i].value;
+          }
+        }
+      }
+
+
+
+
+
+  // 4. 행 수정 함수
+      function modify_table() {
+        var table = document.getElementById('table');
+
+        // 선택된 행이 1개일 때만 수정 가능
+        if (selectedRows.length === 1) {
+          var selectedRow = selectedRows[0]; // 첫 번째 선택된 행만 사용하도록
+          var cells = selectedRow.cells;
+
+          // 기존 값 저장
+          var word = cells[0].innerText;
+          var usage = cells[1].innerText;
+          var createDate = cells[2].innerText;
+          var modifyDate = cells[3].innerText;
+
+          // 수정할 내용을 입력창으로 변경
+          cells[0].innerHTML = '<input type="text" style="font-size: x-small" value='+ word +'>';
+          cells[1].innerHTML = '<input type="text" style="font-size: x-small" value='+ usage +' ">';
+
+          // 선택한 행의 입력창에서 수정 완료 시, 다시 텍스트로 변경하도록 함
+          cells[0].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+              modifySave(cells, word, usage);
+            }
+          });
+          cells[1].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+              modifySave(cells, word, usage);
+            }
+          });
+          selectedRow.classList.remove('selected');   // 행의 선택 표시 제거
+
+        // 1개 이상 선택 시
+        } else if (selectedRows.length >= 1) {
+          alert("1개의 행만 선택해주세요.");
+          for (var i = 0; i < selectedRows.length; i++) {
+            selectedRows[i].classList.remove('selected');
+          }
+
+        // 하나도 선택하지 않았을 때
+        } else {
+          alert("1개의 행을 선택해주세요")
+          selectedRow.classList.remove('selected');
+        }
+      }
+
+      // 4-1. 행 수정 내용 저장
+      function modifySave(cells, word, usage) {
+        // 입력창의 값을 텍스트로 변경하여 저장
+        final_word = cells[0].getElementsByTagName('input')[0].value;
+        final_usage = cells[1].getElementsByTagName('input')[0].value;
+        cells[0].innerHTML = final_word;
+        cells[1].innerHTML = final_usage;
+        // word와 usage가 변경될 때만 modifyDate 값을 변경
+        if (word !== final_word || usage !== final_usage) {
+          cells[3].innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
+        }
+      }
+
+
+
+  // 5. 행 삭제 함수
+      function deleteRows() {
+        var table = document.getElementById('table');
+
+        if (selectedRows.length <= 0) alert("1개 이상의 행을 선택해주세요.")
+        else {
+          // 선택된 행들 삭제
+          for (var i = 0; i < selectedRows.length; i++) {
+            table.deleteRow(selectedRows[i].rowIndex);
+          }
+          selectedRows = [];
+
+          rowCount()   // 총 단어 개수 업데이트
+        }
+      }
+
+
+
+  // 버튼 동작 안 하도록 하는 함수   -> 다른 함수 내에 구현 아직 안 함..
+      function nullBtn(tf) {
+        const filterBtn = document.querySelector('.icon-button img[alt="필터"]');
+        const addBtn = document.querySelector('.icon-button img[alt="추가"]');
+        const modifyBtn = document.querySelector('.icon-button img[alt="수정"]');
+        const delBtn = document.querySelector('.icon-button img[alt="삭제"]');
+
+        if (tf) {
+          console.log("true")
+          filterBtn.disabled = true;
+          addBtn.disabled = true;
+          modifyBtn.disabled = true;
+          delBtn.disabled = true;
+        }
+        else {
+          console.log("false")
+          filterBtn.disabled = false;
+          addBtn.disabled = false;
+          modifyBtn.disabled = false;
+          delBtn.disabled = false;
+          alert("기능 사용 중에는 다른 기능을 사용할 수 없습니다.");
+        }
+      }
+    </script>
+</body>
+</html>

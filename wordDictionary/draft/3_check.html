@@ -108,17 +108,23 @@
 
         <tbody style="cursor: pointer;">
           <tr onclick="javascript:select_table(this);"> <!-- 첫 번째 줄 시작 -->
-            <td>단어1</td>
-            <td>사용여부1</td>
+            <td>신의성실의 원칙</td>
+            <td>1</td>
             <td>2023.7.18 10:15</td>
             <td>2023.7.18 10:15</td>
           </tr>
           <tr onclick="javascript:select_table(this);"> <!-- 두 번째 줄 시작 -->
-              <td>단어2</td>
-              <td>사용여부2</td>
-              <td>2023.8.20 13:12</td>
-              <td>2023.8.20 13:12</td>
+              <td>권리</td>
+              <td>1</td>
+              <td>2023.7.21 13:12</td>
+              <td>2023.7.21 13:12</td>
           </tr>
+          <tr onclick="javascript:select_table(this);"> <!-- 두 번째 줄 시작 -->
+            <td>임의법</td>
+            <td>1</td>
+            <td>2023.8.1 13:12</td>
+            <td>2023.8.1 13:12</td>
+        </tr>
         </tbody>
       </table>
     </div>
@@ -226,7 +232,7 @@
 
         // 새로운 행에 기본값으로 추가
         cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
-        cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
+        cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="사용 여부">';
         cell3.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
         cell4.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;;
 

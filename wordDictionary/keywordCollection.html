@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyword Collection</title>
+
+  <style>
+    .container {display: flex; flex-direction: column; align-items: center; justify-content: center;}
+    /* vh: 뷰포트(viewport)의 단위로, 웹 페이지가 표시되는 화면의 영역을 의미 */
+
+    .input-container {display: flex; gap: 10px;}
+
+    /* 메뉴 */
+    header {height: 75px; padding: 1% 15%; color: #FFFFFF; background: #333333; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
+    li {position: relative; display: inline-block;}
+    li a {color: #FFFFFF; text-align: center; padding: 16px; text-decoration: none;}
+    li a:hover {color: #FFD400;}
+  </style>
+</head>
+
+
+
+<body>
+  <!-- 상단 메뉴 -->
+  <div>
+    <header>
+      <h2>Word Dictionary</h2>
+      <nav>
+        <ul>
+          <li><a href="/keywordCollection">Keyword Collection</a></li>
+          <li><a href="/keywords">Keywords</a></li>
+        </ul>
+      </nav>
+    </header>
+  </div>
+
+
+  <div class="container" style="padding: 10% 0%;">
+    <h1>Keyword Collection</h1>
+    <form id="searchForm">
+      <div class="input-container">
+        <input type="text" id="searchInput" placeholder="수집할 단어를 입력해주세요." style="width: 500px; height: 25px; font-size: x-small;" />
+        <input type="submit" value="저장" style="width: 50px; height: 30px; font-size: x-small;" />
+        <br>
+      </div>
+    </form>
+    {% if keyword != '' %}
+    <br>
+    <p>success</p>
+    <br>
+    <a href="check?query={{keyword}}">{{keyword}} 관련 단어 보러 가기</a>
+    {% endif %}
+  </div>
+
+
+  <script>
+    document.getElementById("searchForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // 기본 제출 동작 막기
+
+        // 입력창의 값을 가져와서 변수에 저장 -> 크롤링할 단어!!!
+        var saveKeyword = document.getElementById("searchInput").value;
+
+
+        // 검색어를 사용하여 원하는 페이지로 이동
+        window.location.href = "keywordCollection?query=" + encodeURIComponent(saveKeyword);
+    });
+</script>
+
+</body>
+</html>
