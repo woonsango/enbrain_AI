@@ -240,10 +240,11 @@
       var hours = now.getHours();
       var minutes = now.getMinutes();
 
+      var button;   // 버튼 활성화를 위한 변수
+
   // 3. 행 추가 함수   -> 취소 기능 만들기
       function add_table() {
         var table = document.getElementById('table');
-        var rowCount = table.rows.length;
 
         var newRow = table.insertRow(1);
 
@@ -252,34 +253,22 @@
         var cell2 = newRow.insertCell(1);
         var cell3 = newRow.insertCell(2);
         var cell4 = newRow.insertCell(3);
-
-        var cancelButton = document.createElement('span');
-        cancelButton.className = 'cancel-button'; // 새로 추가한 클래스
-        cancelButton.innerHTML = 'X';
-        cancelButton.style.color = 'gray';
-        cancelButton.style.marginRight = '20%';
-        cancelButton.addEventListener('click', function () {
-            table.deleteRow(newRow.rowIndex);
-        });
-        cell1.appendChild(cancelButton); // 취소 버튼 추가
+        var cell5 = newRow.insertCell(4);
 
         // 새로운 행에 기본값으로 추가
-        var wordInput = document.createElement('input');
-        wordInput.type = 'text';
-        wordInput.className = 'word-input'; // 새로 추가한 클래스
-        wordInput.placeholder = '단어';
-        wordInput.addEventListener('keydown', function (event) {
-            addSave(event, this);
-        });
-        cell1.appendChild(wordInput); // 단어 입력창 추가
+        cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
         cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="사용 여부">';
         cell3.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
         cell4.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
+        cell5.innerHTML = '<button id="move-btn" class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button>';
 
         // 클릭 이벤트 추가
-        newRow.onclick = function() {
-          select_table(newRow);
-        };
+        // newRow.onclick = function() {
+        //   select_table(newRow);
+        // };
+
+        button = newRow.querySelector('.move-button');
+        button.disabled = true;
 
         rowCount()   // 총 단어 개수 업데이트
       }
@@ -299,13 +288,13 @@
           
           // 입력창의 값을 텍스트로 변경
           var cells = event.target.parentNode.parentNode.cells;   // 현재 입력창이 위치한 행의 모든 셀
-          for (var i = 0; i < cells.length; i++) {
+          for (var i = 0; i < 2; i++) {
             cells[i].innerHTML = inputs[i].value;
           }
+          // 이동 버튼 활성화
+          button.disabled = false;
         }
       }
-
-
 
 
 
