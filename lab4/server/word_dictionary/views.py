@@ -28,9 +28,9 @@ def check(request):
 
     return render(request, 'main/check.html', {'rows': rows})
 
-def wordDictionary(request):
+def history(request):
 
-    return render(request, 'main/wordDictionary.html')
+    return render(request, 'main/history.html')
 
 def keywordCollection(request):
     print(request.GET.get('query'))

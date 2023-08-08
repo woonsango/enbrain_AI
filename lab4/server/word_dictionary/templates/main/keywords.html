@@ -22,6 +22,12 @@
 
         .move-button {border: none; border-radius: 10px; min-height: 25px; min-width: 40px; font-size: x-small;}
 
+        /* 메뉴 */
+        header {height: 75px; padding: 1% 15%; color: #FFFFFF; background: #333333; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
+        li {position: relative; display: inline-block;}
+        li a {color: #FFFFFF; text-align: center; padding: 16px; text-decoration: none;}
+        li a:hover {color: #FFD400;}
+
         /* 모달 스타일 */
         .date-container {display: flex; align-items: center;}
 
@@ -44,9 +50,23 @@
 
 
 <body>
-    <div class="container" style="padding-top: 5%;">
-        <h1>Keywords</h1>
+<!-- 상단 메뉴 -->
+    <div>
+      <header>
+        <h2>Word Dictionary</h2>
+        <nav>
+          <ul>
+            <li><a href="/keywordCollection">Keyword Collection</a></li>
+            <li><a href="/keywords">Keywords</a></li>
+          </ul>
+        </nav>
+      </header>
     </div>
+
+
+    <div style="display: flex; align-items: center; justify-content: center; padding-top: 5%;">
+      <h1>Keywords</h1>
+  </div>
 
 
     <div class="input-container" style="padding-top: 5%;">
@@ -120,6 +140,9 @@
 
         // 검색어를 사용하여 원하는 페이지로 이동
         window.location.href = "check?query=" + encodeURIComponent(tdValue);
+
+        // 세션 스토리지에 데이터 저장 -> history.html에 데이터 넘겨주기 위해..
+        sessionStorage.setItem("keyword", tdValue);
       }
 
 

@@ -6,17 +6,37 @@
     <title>Keyword Collection</title>
 
   <style>
-    .container {display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;}
+    .container {display: flex; flex-direction: column; align-items: center; justify-content: center;}
     /* vh: 뷰포트(viewport)의 단위로, 웹 페이지가 표시되는 화면의 영역을 의미 */
 
     .input-container {display: flex; gap: 10px;}
+
+    /* 메뉴 */
+    header {height: 75px; padding: 1% 15%; color: #FFFFFF; background: #333333; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
+    li {position: relative; display: inline-block;}
+    li a {color: #FFFFFF; text-align: center; padding: 16px; text-decoration: none;}
+    li a:hover {color: #FFD400;}
   </style>
 </head>
 
 
 
 <body>
-  <div class="container">
+  <!-- 상단 메뉴 -->
+  <div>
+    <header>
+      <h2>Word Dictionary</h2>
+      <nav>
+        <ul>
+          <li><a href="/keywordCollection">Keyword Collection</a></li>
+          <li><a href="/keywords">Keywords</a></li>
+        </ul>
+      </nav>
+    </header>
+  </div>
+
+
+  <div class="container" style="padding: 10% 0%;">
     <h1>Keyword Collection</h1>
     <form id="searchForm">
       <div class="input-container">
@@ -45,13 +65,8 @@
         // 검색어를 사용하여 원하는 페이지로 이동
         window.location.href = "keywordCollection?query=" + encodeURIComponent(saveKeyword);
     });
-    // document.getElementById("move").addEventListener("submit", function(event) {
-    //     event.preventDefault();
-    //     var saveKeyword = document.getElementById("searchInput").value;
-    //     console.log(saveKeyword)
-    //     window.location.href = "check?query=" + encodeURIComponent(saveKeyword);
-    // });
 </script>
 
 </body>
 </html>
+

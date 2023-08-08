@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-25o+9$(&dz4211g!z%pilkf%0&3#@zpj-i+$dhki(0)p%5ysf(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -81,7 +81,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # 사용할 데이터베이스 엔진
         'NAME': 'mydb', # 데이터베이스 이름 
         'USER': 'root', # 접속할 Database 계정 아이디 ex) root
-        'PASSWORD': 'qwer',  # 접속할 Database 계정 비밀번호 ex) 1234
+        'PASSWORD': '',  # 접속할 Database 계정 비밀번호 ex) 1234
         'HOST': 'localhost',   # host는 로컬 환경에서 동작한다면 ex) localhost
         'PORT': '3306', # 설치시 설정한 port 번호를 입력한다. ex) 3306
     }
