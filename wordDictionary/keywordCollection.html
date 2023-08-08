@@ -15,7 +15,13 @@
     header {height: 75px; padding: 1% 15%; color: #FFFFFF; background: #333333; font-weight: bold; display: flex; justify-content: space-between; align-items: center;}
     li {position: relative; display: inline-block;}
     li a {color: #FFFFFF; text-align: center; padding: 16px; text-decoration: none;}
-    li a:hover {color: #FFD400;}
+    li a:hover {color: #FFD700;}
+
+    p {font-size: medium; font-weight: bold;}
+
+    /* 용어 단어집으로 이동 */
+    .word_move {color: #000000; font-size: small; text-decoration: none; transition: font-weight 0.2s, color 0.2s; background: linear-gradient(to right, #FFD700 0%, #FFD700 100%) no-repeat; background-size: 0% 100%;}
+    .word_move:hover {color: #000000; font-weight: bold; background-size: 100% 100%; transition: background-size 0.3s;}
   </style>
 </head>
 
@@ -45,11 +51,13 @@
         <br>
       </div>
     </form>
-    {% if keyword != '' %}
-    <br>
+    {% if not keyword in 키워드목록 %}
+    <br><br>
     <p>success</p>
-    <br>
-    <a href="check?query={{keyword}}">{{keyword}} 관련 단어 보러 가기</a>
+      <a class="word_move" href="check?query={{keyword}}">'{{keyword}}' 용어 단어집으로 이동</a>
+    {% else %}
+    <p>이미 존재하는 단어입니다.</p>
+    <a class="word_move" href="check?query={{keyword}}">'{{keyword}}' 용어 단어집으로 이동</a>
     {% endif %}
   </div>
 
