@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-from gensim import models
 from kiwipiepy import Kiwi
 import time
 def get_search_results(search_query):
@@ -138,7 +137,7 @@ def make_word(result):
 def getWord(text):
     search_results = get_search_results(text)
     page_result = {}
-    result =[]
+    result ={}
     for search in search_results:
         similar_word = []
         content, url = tokenizing(search)
@@ -149,18 +148,17 @@ def getWord(text):
             # count = 0
             # if token in ko_model.wv.key_to_index:
                 # cosine_sim = cosine_similarity([ko_model.wv[text_data['parse']['title']]], [ko_model.wv[token]])
-                # if cosine_sim > 0.16 and len(token) >1:
+                if len(token) >1:
                     # print(f'{token}: {cosine_sim}')
                     similar_word.append([token,url])
         for token in cosine:
-            # if cosine[token] > 0.12 and len(token) > 1:
+            if len(token) > 1:
                 # count = text_wikitext.count(token[0])
                 # print(f'{token}: {cosine[token]}')
                 similar_word.append([token, url])
         page_result[search] = similar_word
-        print(page_result)
 
-    result.append([text, page_result])
+    result[text] = page_result
     return result
 
 if __name__ == '__main__' :
