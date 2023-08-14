@@ -287,15 +287,12 @@
             var inputs = newRow.getElementsByTagName('input');
             var finalWord = inputs[0].value;
 
-            // // 하나라도 입력값이 비어있다면 중단   -> 수정하기
-            // var alert = false;
-            // if (finalWord === "" || finalUsage === "") {
-            //   if (!alert) {
-            //     alert("값을 입력하세요!");
-            //     alertShown = true;   // 경고 메세지 한 번만 나오게끔
-            //   }
-            //   return;
-            // }
+            // 하나라도 입력값이 비어있다면 중단
+            if (finalWord === "") {
+              alert("값을 입력하세요!");
+              addMoveBtn.disabled = false;
+              return;
+            }
 
             var cells = newRow.cells;
             cells[0].innerHTML = finalWord;
