@@ -284,8 +284,8 @@
           // 새로운 행에 기본값으로 추가
           cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
           cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="사용 여부">';
-          cell3.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
-          cell4.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
+          cell3.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
+          cell4.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell5.innerHTML = '<button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button>';
 
           // 클릭 이벤트 추가
@@ -409,7 +409,7 @@
 
         // word와 usage가 변경될 때만 modifyDate 값을 변경
         if (word !== finalWord || usage !== finalUsage) {
-          cells[3].innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
+          cells[3].innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
         }
 
           modifyMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
