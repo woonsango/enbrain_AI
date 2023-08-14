@@ -169,7 +169,6 @@ def getWord(text):
         cnt +=1
         if cnt%16==0:
             time.sleep(1)
-        break
     result[text] = page_result
     return result
 
