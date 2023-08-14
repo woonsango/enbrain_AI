@@ -277,11 +277,6 @@
               addSave(newRow);
             }
           });
-          inputs[1].addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-              addSave(newRow);
-            }
-          });
 
           rowCount()   // 총 단어 개수 업데이트
         }
@@ -291,7 +286,6 @@
             // 입력창의 값을 텍스트로 변경하여 저장
             var inputs = newRow.getElementsByTagName('input');
             var finalWord = inputs[0].value;
-            var finalUsage = inputs[1].value;
 
             // // 하나라도 입력값이 비어있다면 중단   -> 수정하기
             // var alert = false;
@@ -305,7 +299,6 @@
 
             var cells = newRow.cells;
             cells[0].innerHTML = finalWord;
-            cells[1].innerHTML = finalUsage;
 
             addMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
             setButtonActionInProgress(false); // 버튼 활성화
