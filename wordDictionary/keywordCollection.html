@@ -51,20 +51,22 @@
         <br>
       </div>
     </form>
-    {% if not keyword in 키워드목록 %}
     <br><br>
-    <p>success</p>
-      <a class="word_move" href="check?query={{keyword}}">'{{keyword}}' 용어 단어집으로 이동</a>
-    {% else %}
-    <p>이미 존재하는 단어입니다.</p>
-    <a class="word_move" href="check?query={{keyword}}">'{{keyword}}' 용어 단어집으로 이동</a>
+    {% if keyword %}
+      {% if not keyword in exit_keyword %}
+        <p>success</p>
+        <a class="word_move" href="check?query={{keyword}}">'{{keyword}}' 용어 단어집으로 이동</a>
+      {% else %}
+        <p>이미 존재하는 단어입니다.</p>
+        <a class="word_move" href="check?query={{keyword}}">'{{keyword}}' 용어 단어집으로 이동</a>
+      {% endif %}
     {% endif %}
   </div>
 
 
   <script>
     document.getElementById("searchForm").addEventListener("submit", function(event) {
-        event.preventDefault(); // 기본 제출 동작 막기
+        event.preventDefault(); // 기본 제출 동작(페이지 새로고침) 막기
 
         // 입력창의 값을 가져와서 변수에 저장 -> 크롤링할 단어!!!
         var saveKeyword = document.getElementById("searchInput").value;
