@@ -29,14 +29,14 @@
         li a:hover {color: #FFD400;}
 
         /* 모달 스타일 */
-        .date-container {display: flex; align-items: center;}
-
         .modal {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);}
-
-        .modal-content {background-color: #ffffff; padding: 20px; border-radius: 5px; max-width: 300px; margin: 100px auto; white-space: nowrap;}
-
-        .close-btn {color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;}
-        .close-btn:hover {color: #000000;}
+        .modal-content {background-color: #ffffff; border-radius: 5px; padding: 20px; max-width: 415px; margin: 15% auto; white-space: nowrap;}
+        .date-container {display: flex; align-items: center;}
+        table.modal-table {border: none; white-space: nowrap; vertical-align: middle;} /* white-space: nowrap -> 텍스트 줄바꿈 방지 */
+        .modal-t {border: none; font-size: small; padding: 15px; text-align: center;}
+        .apply-button {border: none; border-radius: 10px; width: 100%; min-height: 25px; margin-top: 2%;}
+        .close-button {color: #aaaaaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;}
+        .close-button:hover {color: #000000;}
 
         /* 모달 표시 애니메이션 */
         .modal.show {display: block; animation: fadeIn 0.3s;}
@@ -79,30 +79,43 @@
   </div>
 
 
-    <!-- 모달창 -->
-  <div class="input-container">
-    <div id="modal" class="modal">
-      <div class="modal-content">
-          <span class="close-btn" id="close-modal-btn">&times;</span>
-          <label for="add_date">생성일자</label>
-          <div class="date-container">
-            <input type="date" id="add_date">
-            <p> ~ </p>
-            <input type="date" id="add_date2">
-          </div>
-          <br>
-
-          <label for="modify_date">수정일자</label>
-          <div class="date-container">
-            <input type="date" id="modify_date">
-            <p> ~ </p>
-            <input type="date" id="modify_date2">
-          </div>
-
-          <button id="apply-btn" class="container">적용</button>
-      </div>
+  <!-- 모달창 -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="close-modal-btn">&times;</span>
+      <table id="modal-table" class="modal-table" border="0">
+        <tbody>
+          <tr>
+            <th class="modal-t">생성일자</th>
+            <td class="modal-t">
+              <div class="date-container">
+                <input type="date" id="add-date-start">
+                <p style="padding: 0% 3%;"> ~ </p>
+                <input type="date" id="add-date-end">
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <th class="modal-t">수정일자</th>
+            <td class="modal-t">
+              <div class="date-container">
+                <input type="date" id="modify-date-start">
+                <p style="padding: 0% 3%;"> ~ </p>
+                <input type="date" id="modify-date-end">
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="modal-t" colspan="2">
+              <button id="apply-btn" class="apply-button">적용</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
+  
+  
 
 
     <!-- 테이블 -->
@@ -119,7 +132,7 @@
 
         <tbody style="cursor: pointer;">
           {% for row in words %}
-            <tr onclick="javascript:select_table(this);"> <!-- 첫 번째 줄 시작 -->
+            <tr onclick="javascript:select_table(this);">
               <td>{{row.0}}</td>
               <td>{{row.1}}</td>
               <td>{{row.2}}</td>
@@ -148,6 +161,7 @@
 
 
 
+
   // 버튼 실행 중일 때, 다른 버튼 동작 안 하도록 하는 함수
       let isActionInProgress = false;   // 기능 동작 중 여부를 저장할 변수
       // alert("버튼 사용 중에는 다른 버튼을 사용할 수 없습니다.");
@@ -173,9 +187,46 @@
       const closeModalBtn = document.getElementById('close-modal-btn');
       closeModalBtn.addEventListener('click', () => {modal.classList.remove('show');});
 
-      // 검색 필터 적용 기능 구현해야 함
-      const applyBtn = document.getElementById('apply-btn');
-      // applyBtn.addEventListener('click', () => {});
+      // 적용 버튼 클릭 시, 검색 필터 적용
+      // const modalApply = document.getElementById('apply-btn');
+      // modalApply.addEventListener('click', () => {
+      //   // 생성일자
+      //   const addDateStart = new Date(document.getElementById('add-date-start').value);
+      //   const addDateEnd = new Date(document.getElementById('add-date-end').value);
+      //   addDateStart.setHours(0, 0, 0, 0); // 시간 부분 0으로 설정 (없으면 09:00:00로 나옴)
+      //   addDateEnd.setHours(0, 0, 0, 0);
+
+      //   console.log(addDateStart);
+      //   console.log(addDateEnd);
+
+      //   // 수정일자
+      //   const modifyDateStart = new Date(document.getElementById('modify-date-start').value);
+      //   const modifyDateEnd = new Date(document.getElementById('modify-date-end').value);
+      //   modifyDateStart.setHours(0, 0, 0, 0);
+      //   modifyDateEnd.setHours(0, 0, 0, 0);
+
+      //   console.log(modifyDateStart);
+      //   console.log(modifyDateEnd);
+
+      //   const tableRows = document.querySelectorAll('#table tbody tr');
+
+      //   tableRows.forEach(row => {
+      //     // 생성일자 열의 내용 (YYYY-MM-DD HH:MM:SS")
+      //     const createDate = new Date(row.cells[1].textContent);
+      //     createDate.setHours(0, 0, 0, 0);   // 시간 부분 0으로 설정
+          
+      //     // 수정일자 열의 내용
+      //     const modifyDate = new Date(row.cells[2].textContent);
+      //     modifyDate.setHours(0, 0, 0, 0);
+
+      //     if ((!addDateStart || createDate >= addDateStart) && (!addDateEnd || createDate <= addDateEnd) &&
+      //       (!modifyDateStart || modifyDate >= modifyDateStart) && (!modifyDateEnd || modifyDate <= modifyDateEnd)) {
+      //       row.style.display = 'table-row';
+      //     } else {
+      //       row.style.display = 'none';
+      //     }
+      //   });
+      // });
 
 
 
