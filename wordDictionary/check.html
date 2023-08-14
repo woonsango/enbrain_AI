@@ -126,6 +126,7 @@
             <th>사용 여부</th>
             <th>생성일자</th>
             <th>수정일자</th>
+            <th>URL</th>
             <th>히스토리 이동</th>
           </tr>
         </thead>
@@ -137,6 +138,7 @@
               <td>{{row.1}}</td>
               <td>{{row.2}}</td>
               <td>{{row.3}}</td>
+              <td>url 부분</td>
               <td><button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button></td>
             </tr>
             {% endfor %}
@@ -280,13 +282,15 @@
           var cell3 = newRow.insertCell(2);
           var cell4 = newRow.insertCell(3);
           var cell5 = newRow.insertCell(4);
+          var cell6 = newRow.insertCell(5);
 
           // 새로운 행에 기본값으로 추가
           cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
           cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="사용 여부">';
           cell3.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell4.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
-          cell5.innerHTML = '<button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button>';
+          cell5.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="url">';
+          cell6.innerHTML = '<button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button>';
 
           // 클릭 이벤트 추가
           newRow.onclick = function() {
@@ -297,7 +301,7 @@
           addMoveBtn = newRow.querySelector('.move-button');
           addMoveBtn.disabled = true;
 
-          // 선택한 행의 입력창에서 수정 완료 시, 다시 텍스트로 변경하도록 함
+          // 입력창에서 엔터 누르면 저장 함수로 이동
           var inputs = newRow.getElementsByTagName('input');
           inputs[0].addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
@@ -305,6 +309,12 @@
             }
           });
           inputs[1].addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+              addSave(newRow);
+              console.log(inputs[4])
+            }
+          });
+          inputs[2].addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
               addSave(newRow);
             }
@@ -319,20 +329,12 @@
           var inputs = newRow.getElementsByTagName('input');
           var finalWord = inputs[0].value;
           var finalUsage = inputs[1].value;
-
-          // // 하나라도 입력값이 비어있다면 중단   -> 수정하기
-          // var alert = false;
-          // if (finalWord === "" || finalUsage === "") {
-          //   if (!alert) {
-          //     alert("값을 입력하세요!");
-          //     alertShown = true;   // 경고 메세지 한 번만 나오게끔
-          //   }
-          //   return;
-          // }
+          var finalUrl = inputs[2].value;
 
           var cells = newRow.cells;
           cells[0].innerHTML = finalWord;
           cells[1].innerHTML = finalUsage;
+          cells[4].innerHTML = finalUrl;
 
           addMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
           setButtonActionInProgress(false); // 버튼 활성화
@@ -358,24 +360,29 @@
             // 기존 값 저장
             var word = cells[0].innerText;
             var usage = cells[1].innerText;
-            var createDate = cells[2].innerText;
-            var modifyDate = cells[3].innerText;
+            var url = cells[4].innerText;
 
             // 수정할 내용을 입력창으로 변경
-            cells[0].innerHTML = '<input type="text" style="font-size: x-small" value='+ word +'>';
-            cells[1].innerHTML = '<input type="text" style="font-size: x-small" value='+ usage +' ">';
+            cells[0].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (word !== undefined ? word : '') +' ">';
+            cells[1].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (usage !== undefined ? usage : '') +' ">';
+            cells[4].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (url !== undefined ? url : '') +' ">';
 
             // 용어단어집 이동 버튼 비활성화
             modifyMoveBtn = table.querySelector('.move-button');
             modifyMoveBtn.disabled = true;
 
-            // 선택한 행의 입력창에서 수정 완료 시, 다시 텍스트로 변경하도록 함
+            // 입력창에서 엔터 누르면 저장 함수로 이동
             cells[0].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
               if (event.key === 'Enter') {
                 modifySave(cells, word, usage);
               }
             });
             cells[1].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
+              if (event.key === 'Enter') {
+                modifySave(cells, word, usage);
+              }
+            });
+            cells[4].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
               if (event.key === 'Enter') {
                 modifySave(cells, word, usage);
               }
@@ -387,6 +394,7 @@
           // 1개 이상 선택 시
           else if (selectedRows.length >= 1) {
             alert("1개의 행만 선택해주세요.");
+            setButtonActionInProgress(false);
             for (var i = 0; i < selectedRows.length; i++) {
               selectedRows[i].classList.remove('selected');
             }
@@ -394,7 +402,8 @@
 
           // 하나도 선택하지 않았을 때
           else {
-            alert("1개의 행을 선택해주세요")
+            alert("1개의 행을 선택해주세요");
+            setButtonActionInProgress(false);
             selectedRow.classList.remove('selected');
           }
         }
@@ -402,13 +411,16 @@
       // 3-1. 행 수정 내용 저장
       function modifySave(cells, word, usage) {
         // 입력창의 값을 텍스트로 변경하여 저장
-        finalWord = cells[0].getElementsByTagName('input')[0].value;
-        finalUsage = cells[1].getElementsByTagName('input')[0].value;
+        var finalWord = cells[0].getElementsByTagName('input')[0].value;
+        var finalUsage = cells[1].getElementsByTagName('input')[0].value;
+        var finalUrl = cells[4].getElementsByTagName('input')[0].value;
+
         cells[0].innerHTML = finalWord;
         cells[1].innerHTML = finalUsage;
+        cells[4].innerHTML = finalUrl;
 
         // word와 usage가 변경될 때만 modifyDate 값을 변경
-        if (word !== finalWord || usage !== finalUsage) {
+        if (word !== finalWord || usage !== finalUsage || url !== finalUrl) {
           cells[3].innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
         }
 
