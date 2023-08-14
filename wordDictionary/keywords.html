@@ -142,7 +142,7 @@
         // 검색어를 사용하여 원하는 페이지로 이동
         window.location.href = "check?query=" + encodeURIComponent(tdValue);
 
-        // 세션 스토리지에 데이터 저장 -> history.html에 데이터 넘겨주기 위해..
+        // history.html에 데이터 넘겨주기 위해 세션 스토리지에 데이터 저장
         sessionStorage.setItem("keyword", tdValue);
       }
 

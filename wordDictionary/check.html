@@ -149,9 +149,14 @@
 
     <script>
   // 새 페이지(히스토리 창)로 이동
-      function moveHistory(keyword) {
+      function moveHistory(word) {
         const open = window.open("about:blank")
-        open.location.href = "/history" 
+        open.location.href = "/history"
+
+        // history.html에 데이터 넘겨주기 위해 세션 스토리지에 데이터 저장
+        const tdWord = word.querySelector('td:first-child').textContent;
+        console.log(tdWord);
+        sessionStorage.setItem("word", tdWord);
       }
 
 
