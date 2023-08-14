@@ -14,7 +14,6 @@ def get_search_results(search_query):
     # 먼저 단어 총 개수 알아내기
     res_num = soup.find('div', class_ = "results-info")
     totalnum = int(res_num['data-mw-num-results-total'])
-    print(totalnum)
     results = soup.find_all('div', class_='mw-search-result-heading')
 
     search_results = []
@@ -23,6 +22,7 @@ def get_search_results(search_query):
         title_tag = div.find('a', attrs={'title': True})
         if title_tag:
             title = title_tag['title']
+            title = title.replace(' ', '_')
             search_results.append(title)
     
     # 2번째 검색부터 반복 
@@ -74,7 +74,7 @@ def make_word(result):
     bef_tag = ""
     bef_loc = 0
     form_num = 0
-    cosine_sum = 0
+    cnt_dict = {}
     cosine = {}
 
     for form, tag, start, length in result:
@@ -85,6 +85,10 @@ def make_word(result):
                 temp_word += form
             # 띄어쓰기 후에 들어오는 명사
             elif bef_tag == 'NN' and bef_loc != start:
+                if temp_word in cnt_dict:
+                    cnt_dict[temp_word] += 1
+                else:
+                    cnt_dict[temp_word] = 1
                 made_words.append(temp_word)
                 temp_word = form
                 form_num = 0
@@ -116,6 +120,10 @@ def make_word(result):
         
         else:
             if bef_tag == 'NN' and len(temp_word) > 1:
+                if temp_word in cnt_dict:
+                    cnt_dict[temp_word] += 1
+                else:
+                    cnt_dict[temp_word] = 1
                 made_words.append(temp_word)
                 # for token in cosine_list:
                 #     if token in ko_model.wv.key_to_index:
@@ -131,17 +139,18 @@ def make_word(result):
             bef_loc = 0
             form_num = 0
 
-    return cosine, made_words
+    return cosine, made_words, cnt_dict
 
 # 키워드와 관련된 유사도 높은 결과 단어 추출
 def getWord(text):
     search_results = get_search_results(text)
     page_result = {}
     result ={}
+    cnt = 0
     for search in search_results:
         similar_word = []
         content, url = tokenizing(search)
-        cosine, made_words = make_word(content)
+        cosine, made_words,cnt_dict = make_word(content)
         made_words_set = set(made_words)
         final_words_list = list(made_words_set)
         for token in final_words_list:
@@ -150,20 +159,27 @@ def getWord(text):
                 # cosine_sim = cosine_similarity([ko_model.wv[text_data['parse']['title']]], [ko_model.wv[token]])
                 if len(token) >1:
                     # print(f'{token}: {cosine_sim}')
-                    similar_word.append([token,url])
+                    similar_word.append([token, cnt_dict[token],url]) 
         for token in cosine:
             if len(token) > 1:
                 # count = text_wikitext.count(token[0])
                 # print(f'{token}: {cosine[token]}')
-                similar_word.append([token, url])
+                similar_word.append([token, cnt_dict[token], url])
         page_result[search] = similar_word
-
+        cnt +=1
+        if cnt%16==0:
+            time.sleep(1)
+        break
     result[text] = page_result
     return result
 
 if __name__ == '__main__' :
     result = getWord("민법")
     print(result)
+    import pickle
+    import gzip
+    with gzip.open('first_crawling', 'wb') as f:
+        pickle.dump(result, f)
     # print(len(result))
 # search_query = "민법"
 # start = time.time()
