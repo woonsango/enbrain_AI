@@ -78,7 +78,7 @@
         <button class="icon-button" id="open-modal-btn"><img src="{% static 'images/btn_imgs/filter.png' %}" alt="필터" width="17px"></button>
         <button class="icon-button"><img src="{% static 'images/btn_imgs/add.png' %}" alt="추가" width="17px" onclick="add_table()"></button>
         <button class="icon-button"><img src="{% static 'images/btn_imgs/modify.png' %}" alt="수정" width="17px" onclick="modify_table()"></button>
-        <button class="icon-button"><img src="{% static 'images/btn_imgs/delete.png' %}" alt="삭제" width="17px" onclick="deleteRows()"></button>
+        <button class="icon-button" id="add-btn"><img src="{% static 'images/btn_imgs/delete.png' %}" alt="삭제" width="17px" onclick="deleteRows()"></button>
       </div>
   </div>
 
@@ -137,7 +137,7 @@
               <td>{{row.1}}</td>
               <td>{{row.2}}</td>
               <td>{{row.3}}</td>
-              <td><button id="move-btn" class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button></td>
+              <td><button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -154,11 +154,32 @@
 
 
 
+
+  // 버튼 실행 중일 때, 다른 버튼 동작 안 하도록 하는 함수
+      let isActionInProgress = false;   // 기능 동작 중 여부를 저장할 변수
+      // alert("버튼 사용 중에는 다른 버튼을 사용할 수 없습니다.");
+
+      // 버튼 동작 여부를 변경하는 함수
+      function setButtonActionInProgress(status) {
+        isActionInProgress = status; 
+        const buttons = document.querySelectorAll('.icon-button');
+        for (const button of buttons) {
+          button.disabled = status; // 모든 아이콘 버튼 비활성화
+        }
+      }
+
+
+
+
   // 모달창
       // 모달 열기
       const openModalBtn = document.getElementById('open-modal-btn');
       const modal = document.getElementById('modal');
-      openModalBtn.addEventListener('click', () => {modal.classList.add('show');});
+      openModalBtn.addEventListener('click', () => {
+        if (!isActionInProgress) { // 다른 기능 동작 중이 아닐 때만 모달 열기
+          modal.classList.add('show');
+        }
+      });
 
       // 모달 닫기
       const closeModalBtn = document.getElementById('close-modal-btn');
@@ -171,7 +192,7 @@
 
 
 
-  // 0. 검색 결과 개수 함수
+  // 검색 결과 개수 함수
       function rowCount() {
         var table = document.getElementById('table');
         var rowCnt = table.tBodies[0].rows.length;
@@ -185,7 +206,8 @@
 
 
 
-  // 1. 키워드 수집 관련 함수
+
+  // 키워드 수집 관련 함수
       // URL 파라미터에서 검색어 값 가져오기
       const urlParams = new URLSearchParams(window.location.search);
       const saveKeyword = urlParams.get('query');
@@ -197,7 +219,8 @@
 
 
 
-  // 2. 행 선택 함수
+
+  // 1. 행 선택 함수
       var selectedRows = []; // 선택된 행들을 저장할 배열
 
       function select_table(target) {
@@ -240,164 +263,182 @@
       var hours = now.getHours();
       var minutes = now.getMinutes();
 
-      var button;   // 버튼 활성화를 위한 변수
+      var addMoveBtn;   // 용어단어집 이동 버튼 활성화를 위한 변수
 
-  // 3. 행 추가 함수   -> 취소 기능 만들기
+  // 2. 행 추가 함수
       function add_table() {
-        var table = document.getElementById('table');
+        if (!isActionInProgress) {
+          setButtonActionInProgress(true);   // 버튼 동작 중으로 변경
 
-        var newRow = table.insertRow(1);
+          var table = document.getElementById('table');
 
-        // 각 셀에 데이터 추가
-        var cell1 = newRow.insertCell(0);
-        var cell2 = newRow.insertCell(1);
-        var cell3 = newRow.insertCell(2);
-        var cell4 = newRow.insertCell(3);
-        var cell5 = newRow.insertCell(4);
+          var newRow = table.insertRow(1);
 
-        // 새로운 행에 기본값으로 추가
-        cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
-        cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="사용 여부">';
-        cell3.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
-        cell4.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
-        cell5.innerHTML = '<button id="move-btn" class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button>';
+          // 각 셀에 데이터 추가
+          var cell1 = newRow.insertCell(0);
+          var cell2 = newRow.insertCell(1);
+          var cell3 = newRow.insertCell(2);
+          var cell4 = newRow.insertCell(3);
+          var cell5 = newRow.insertCell(4);
 
-        // 클릭 이벤트 추가
-        // newRow.onclick = function() {
-        //   select_table(newRow);
-        // };
+          // 새로운 행에 기본값으로 추가
+          cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
+          cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="사용 여부">';
+          cell3.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
+          cell4.innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
+          cell5.innerHTML = '<button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button>';
 
-        button = newRow.querySelector('.move-button');
-        button.disabled = true;
+          // 클릭 이벤트 추가
+          newRow.onclick = function() {
+            select_table(newRow);
+          };
 
-        rowCount()   // 총 단어 개수 업데이트
-      }
-
-      // 3-1. 엔터 키를 누르면, 입력창의 값을 저장
-      function addSave(event) {
-        if (event.key === 'Enter') {
-          var inputs = document.querySelectorAll('#table input[type="text"]');   // 테이블 안의 모든 input 요소 선택
-          for (var i = 0; i < inputs.length; i++) {
-            var value = inputs[i].value.trim();
-
-            if (value === "") {
-              alert("값을 입력하세요!");
-              return; // 하나라도 입력값이 비어있다면 중단
-            }
-          }
-          
-          // 입력창의 값을 텍스트로 변경
-          var cells = event.target.parentNode.parentNode.cells;   // 현재 입력창이 위치한 행의 모든 셀
-          for (var i = 0; i < 2; i++) {
-            cells[i].innerHTML = inputs[i].value;
-          }
-          // 이동 버튼 활성화
-          button.disabled = false;
-        }
-      }
-
-
-
-  // 4. 행 수정 함수
-      function modify_table() {
-        var table = document.getElementById('table');
-
-        // 선택된 행이 1개일 때만 수정 가능
-        if (selectedRows.length === 1) {
-          var selectedRow = selectedRows[0]; // 첫 번째 선택된 행만 사용하도록
-          var cells = selectedRow.cells;
-
-          // 기존 값 저장
-          var word = cells[0].innerText;
-          var usage = cells[1].innerText;
-          var createDate = cells[2].innerText;
-          var modifyDate = cells[3].innerText;
-
-          // 수정할 내용을 입력창으로 변경
-          cells[0].innerHTML = '<input type="text" style="font-size: x-small" value='+ word +'>';
-          cells[1].innerHTML = '<input type="text" style="font-size: x-small" value='+ usage +' ">';
+          // 용어단어집 이동 버튼 비활성화
+          addMoveBtn = newRow.querySelector('.move-button');
+          addMoveBtn.disabled = true;
 
           // 선택한 행의 입력창에서 수정 완료 시, 다시 텍스트로 변경하도록 함
-          cells[0].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
+          var inputs = newRow.getElementsByTagName('input');
+          inputs[0].addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
-              modifySave(cells, word, usage);
+              addSave(newRow);
             }
           });
-          cells[1].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
+          inputs[1].addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
-              modifySave(cells, word, usage);
+              addSave(newRow);
             }
           });
-          selectedRow.classList.remove('selected');   // 행의 선택 표시 제거
-
-        // 1개 이상 선택 시
-        } else if (selectedRows.length >= 1) {
-          alert("1개의 행만 선택해주세요.");
-          for (var i = 0; i < selectedRows.length; i++) {
-            selectedRows[i].classList.remove('selected');
-          }
-
-        // 하나도 선택하지 않았을 때
-        } else {
-          alert("1개의 행을 선택해주세요")
-          selectedRow.classList.remove('selected');
-        }
-      }
-
-      // 4-1. 행 수정 내용 저장
-      function modifySave(cells, word, usage) {
-        // 입력창의 값을 텍스트로 변경하여 저장
-        final_word = cells[0].getElementsByTagName('input')[0].value;
-        final_usage = cells[1].getElementsByTagName('input')[0].value;
-        cells[0].innerHTML = final_word;
-        cells[1].innerHTML = final_usage;
-        // word와 usage가 변경될 때만 modifyDate 값을 변경
-        if (word !== final_word || usage !== final_usage) {
-          cells[3].innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
-        }
-      }
-
-
-
-  // 5. 행 삭제 함수
-      function deleteRows() {
-        var table = document.getElementById('table');
-
-        if (selectedRows.length <= 0) alert("1개 이상의 행을 선택해주세요.")
-        else {
-          // 선택된 행들 삭제
-          for (var i = 0; i < selectedRows.length; i++) {
-            table.deleteRow(selectedRows[i].rowIndex);
-          }
-          selectedRows = [];
 
           rowCount()   // 총 단어 개수 업데이트
         }
+
+        // 2-1. 행 추가 내용 저장
+        function addSave(newRow) {
+          // 입력창의 값을 텍스트로 변경하여 저장
+          var inputs = newRow.getElementsByTagName('input');
+          var finalWord = inputs[0].value;
+          var finalUsage = inputs[1].value;
+
+          // // 하나라도 입력값이 비어있다면 중단   -> 수정하기
+          // var alert = false;
+          // if (finalWord === "" || finalUsage === "") {
+          //   if (!alert) {
+          //     alert("값을 입력하세요!");
+          //     alertShown = true;   // 경고 메세지 한 번만 나오게끔
+          //   }
+          //   return;
+          // }
+
+          var cells = newRow.cells;
+          cells[0].innerHTML = finalWord;
+          cells[1].innerHTML = finalUsage;
+
+          addMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
+          setButtonActionInProgress(false); // 버튼 활성화
+        }
       }
 
 
 
-  // 버튼 동작 안 하도록 하는 함수   -> 다른 함수 내에 구현 아직 안 함..
-      function nullBtn(tf) {
-        const filterBtn = document.querySelector('.icon-button img[alt="필터"]');
-        const addBtn = document.querySelector('.icon-button img[alt="추가"]');
-        const modifyBtn = document.querySelector('.icon-button img[alt="수정"]');
-        const delBtn = document.querySelector('.icon-button img[alt="삭제"]');
+  // 3. 행 수정 함수
+      var modifyMoveBtn;
 
-        if (tf) {
-          console.log("true")
-          filterBtn.disabled = true;
-          addBtn.disabled = true;
-          modifyBtn.disabled = true;
-          delBtn.disabled = true;
+      function modify_table() {
+        if (!isActionInProgress) {
+          setButtonActionInProgress(true);   // 버튼 동작 중으로 변경
+
+          var table = document.getElementById('table');
+
+          // 선택된 행이 1개일 때만 수정 가능
+          if (selectedRows.length === 1) {
+            var selectedRow = selectedRows[0]; // 첫 번째 선택된 행만 사용하도록
+            var cells = selectedRow.cells;
+
+            // 기존 값 저장
+            var word = cells[0].innerText;
+            var usage = cells[1].innerText;
+            var createDate = cells[2].innerText;
+            var modifyDate = cells[3].innerText;
+
+            // 수정할 내용을 입력창으로 변경
+            cells[0].innerHTML = '<input type="text" style="font-size: x-small" value='+ word +'>';
+            cells[1].innerHTML = '<input type="text" style="font-size: x-small" value='+ usage +' ">';
+
+            // 용어단어집 이동 버튼 비활성화
+            modifyMoveBtn = table.querySelector('.move-button');
+            modifyMoveBtn.disabled = true;
+
+            // 선택한 행의 입력창에서 수정 완료 시, 다시 텍스트로 변경하도록 함
+            cells[0].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
+              if (event.key === 'Enter') {
+                modifySave(cells, word, usage);
+              }
+            });
+            cells[1].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
+              if (event.key === 'Enter') {
+                modifySave(cells, word, usage);
+              }
+            });
+
+            selectedRow.classList.remove('selected');   // 행의 선택 표시 제거
+          }
+
+          // 1개 이상 선택 시
+          else if (selectedRows.length >= 1) {
+            alert("1개의 행만 선택해주세요.");
+            for (var i = 0; i < selectedRows.length; i++) {
+              selectedRows[i].classList.remove('selected');
+            }
+          }
+
+          // 하나도 선택하지 않았을 때
+          else {
+            alert("1개의 행을 선택해주세요")
+            selectedRow.classList.remove('selected');
+          }
         }
-        else {
-          console.log("false")
-          filterBtn.disabled = false;
-          addBtn.disabled = false;
-          modifyBtn.disabled = false;
-          delBtn.disabled = false;
-          alert("기능 사용 중에는 다른 기능을 사용할 수 없습니다.");
+
+      // 3-1. 행 수정 내용 저장
+      function modifySave(cells, word, usage) {
+        // 입력창의 값을 텍스트로 변경하여 저장
+        finalWord = cells[0].getElementsByTagName('input')[0].value;
+        finalUsage = cells[1].getElementsByTagName('input')[0].value;
+        cells[0].innerHTML = finalWord;
+        cells[1].innerHTML = finalUsage;
+
+        // word와 usage가 변경될 때만 modifyDate 값을 변경
+        if (word !== finalWord || usage !== finalUsage) {
+          cells[3].innerHTML = year + "." + month + "." + date + " " + hours + ":" + minutes;
+        }
+
+          modifyMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
+          setButtonActionInProgress(false); // 버튼 활성화
+        }
+      }
+
+
+
+
+  // 4. 행 삭제 함수
+      function deleteRows() {
+        if (!isActionInProgress) {
+          setButtonActionInProgress(true); // 버튼 동작 중으로 변경
+
+          var table = document.getElementById('table');
+
+          if (selectedRows.length <= 0) alert("1개 이상의 행을 선택해주세요.");
+          else {
+            // 선택된 행들 삭제
+            for (var i = 0; i < selectedRows.length; i++) {
+              table.deleteRow(selectedRows[i].rowIndex);
+            }
+            selectedRows = [];
+
+            rowCount()   // 총 단어 개수 업데이트
+          }
+
+          setButtonActionInProgress(false); // 버튼 활성화
         }
       }
     </script>
