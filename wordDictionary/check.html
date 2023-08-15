@@ -38,9 +38,8 @@
     .close-button {color: #aaaaaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;}
     .close-button:hover {color: #000000;}
     .select input[type=radio] {display: none;}
-    .select input[type=radio]+label {display: inline-block; cursor: pointer; height: 100%; width: 100px; border-radius: 10px; line-height: 24px; text-align: center; font-size: x-small;}
-    .select input[type=radio]+label {background-color: #ffffff; color: #000000;}
-    .select input[type=radio]:checked+label {background-color: #eeeeee; color: #000000; font-weight: bold;}
+    .select input[type=radio]+label {display: inline-block; cursor: pointer; width: 100px; border-radius: 10px; line-height: 24px; text-align: center; font-size: x-small;}
+    .select input[type=radio]:checked+label {background-color: #eeeeee; font-weight: bold;}
 
     /* 모달 표시 애니메이션 */
     .modal.show {display: block; animation: fadeIn 0.3s;}
@@ -123,6 +122,16 @@
             </td>
           </tr>
           <tr>
+            <th class="modal-t">빈도수</th>
+            <td class="modal-t">
+              <div class="date-container">
+                <input type="input" id="modify-date-start">
+                <p style="padding: 0% 3%;"> ~ </p>
+                <input type="input" id="modify-date-end">
+              </div>
+            </td>
+          </tr>
+          <tr>
             <td class="modal-t" colspan="2">
               <button id="apply-btn" class="apply-button">적용</button>
             </td>
@@ -143,6 +152,7 @@
             <th>생성일자</th>
             <th>수정일자</th>
             <th>URL</th>
+            <th>빈도수</th>
             <th>히스토리 이동</th>
           </tr>
         </thead>
@@ -155,6 +165,7 @@
               <td>{{row.2}}</td>
               <td>{{row.3}}</td>
               <td>url 부분</td>
+              <td>빈도수 부분</td>
               <td><button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button></td>
             </tr>
             {% endfor %}
