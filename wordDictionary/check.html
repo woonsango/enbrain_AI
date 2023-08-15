@@ -315,6 +315,7 @@
           var cell4 = newRow.insertCell(3);
           var cell5 = newRow.insertCell(4);
           var cell6 = newRow.insertCell(5);
+          var cell7 = newRow.insertCell(6);
 
           // 새로운 행에 기본값으로 추가
           cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
@@ -322,7 +323,8 @@
           cell3.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell4.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell5.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="url">';
-          cell6.innerHTML = '<button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button>';
+          cell6.innerHTML = '';   // 빈도수 값 넣어주기
+          cell7.innerHTML = '<button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button>';
 
           // 클릭 이벤트 추가
           newRow.onclick = function() {
