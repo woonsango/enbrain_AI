@@ -284,10 +284,10 @@
     // 현재 날짜 및 시간
     var now = new Date();
     var year = now.getFullYear();
-    var month = now.getMonth()+1 ;
-    var date = now.getDate();
-    var hours = now.getHours();
-    var minutes = now.getMinutes();
+    var month = ('0' + (now.getMonth()+1)).slice(-2);
+    var date = ('0' + now.getDate()).slice(-2);
+    var hours = ('0' + now.getHours()).slice(-2);
+    var minutes = ('0' + now.getMinutes()).slice(-2);
 
     var addMoveBtn;   // 용어단어집 이동 버튼 활성화를 위한 변수
 
