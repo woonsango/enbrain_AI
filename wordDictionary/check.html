@@ -405,15 +405,20 @@
             var url = cells[4].innerText;
 
             // 수정할 내용을 입력창으로 변경
-            cells[0].innerHTML = '<button class="icon-button close-row-btn" style="margin-right: 20px;" onclick="cancelRow(this)">&times;</button>' +
+            cells[0].innerHTML = '<button class="icon-button close-row-btn" style="margin-right: 20px;">&times;</button>' +
                                 '<input type="text" style="font-size: x-small" value=" '+ (word !== undefined ? word : '') +' ">';
             cells[1].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (usage !== undefined ? usage : '') +' ">';
             cells[4].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (url !== undefined ? url : '') +' ">';
 
-            // 취소 버튼 클릭 이벤트 추가
-            var cancelBtn = cell[0].querySelector('.close-row-btn');
+            // 취소 버튼 클릭 이벤트 추가                                  ->> 수정하기!!!
+            var cancelBtn = cells[0].querySelector('.close-row-btn');
             cancelBtn.addEventListener('click', function() {
-              newRow.remove(); // 해당 행을 삭제
+              // 입력창을 기존값으로 변경
+              cells[0].innerHTML = word;
+              cells[1].innerHTML = usage;
+              cells[4].innerHTML = url;
+              console.log(cells);
+              modifyMoveBtn.disabled = false;
               setButtonActionInProgress(false); // 버튼 활성화
             });
 
