@@ -318,13 +318,21 @@
           var cell7 = newRow.insertCell(6);
 
           // 새로운 행에 기본값으로 추가
-          cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
+          cell1.innerHTML = '<button class="icon-button close-row-btn" style="margin-right: 20px;" onclick="cancelRow(this)">&times;</button>' +
+                            '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
           cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="사용 여부">';
           cell3.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell4.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell5.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="url">';
           cell6.innerHTML = '';   // 빈도수 값 넣어주기
           cell7.innerHTML = '<button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button>';
+
+          // 취소 버튼 클릭 이벤트 추가
+          var cancelBtn = cell1.querySelector('.close-row-btn');
+          cancelBtn.addEventListener('click', function() {
+            newRow.remove(); // 해당 행을 삭제
+            setButtonActionInProgress(false); // 버튼 활성화
+          });
 
           // 클릭 이벤트 추가
           newRow.onclick = function() {
@@ -397,9 +405,17 @@
             var url = cells[4].innerText;
 
             // 수정할 내용을 입력창으로 변경
-            cells[0].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (word !== undefined ? word : '') +' ">';
+            cells[0].innerHTML = '<button class="icon-button close-row-btn" style="margin-right: 20px;" onclick="cancelRow(this)">&times;</button>' +
+                                '<input type="text" style="font-size: x-small" value=" '+ (word !== undefined ? word : '') +' ">';
             cells[1].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (usage !== undefined ? usage : '') +' ">';
             cells[4].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (url !== undefined ? url : '') +' ">';
+
+            // 취소 버튼 클릭 이벤트 추가
+            var cancelBtn = cell[0].querySelector('.close-row-btn');
+            cancelBtn.addEventListener('click', function() {
+              newRow.remove(); // 해당 행을 삭제
+              setButtonActionInProgress(false); // 버튼 활성화
+            });
 
             // 용어단어집 이동 버튼 비활성화
             modifyMoveBtn = table.querySelector('.move-button');

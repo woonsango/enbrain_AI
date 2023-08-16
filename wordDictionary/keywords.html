@@ -43,7 +43,7 @@
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
-        }
+          }
     </style>
 </head>
 
@@ -246,6 +246,7 @@
 
 
 
+
   // 1. 행 선택 함수
       var selectedRows = []; // 선택된 행들을 저장할 배열
       function select_table(target) {
@@ -307,10 +308,19 @@
           var cell4 = newRow.insertCell(3);
 
           // 새로운 행에 기본값으로 추가
-          cell1.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="키워드">';
+          cell1.innerHTML = '<button class="icon-button close-row-btn" style="margin-right: 20px;" onclick="cancelRow(this)">&times;</button>' +
+                            '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="키워드">';
           cell2.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell3.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell4.innerHTML = '<button id="move-btn" class="move-button" onclick="moveCheck(this.parentNode.parentNode)">이동</button>';
+
+
+          // 취소 버튼 클릭 이벤트 추가
+          var cancelBtn = cell1.querySelector('.close-row-btn');
+          cancelBtn.addEventListener('click', function() {
+            newRow.remove(); // 해당 행을 삭제
+            setButtonActionInProgress(false); // 버튼 활성화
+          });
 
           // 클릭 이벤트 추가
           newRow.onclick = function() {
