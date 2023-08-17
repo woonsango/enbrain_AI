@@ -45,7 +45,7 @@ def keywordCollection(request):
 
             print(exit_keyword)
             if keyword in exit_keyword:
-                return render(request, 'main/keywordCollection.html', {"keyword": "이미 존재하는 단어입니다"})
+                return render(request, 'main/keywordCollection.html', {"keyword": keyword, "exit_keyword": exit_keyword})
         crawling_data = getWord(keyword)
         with connection.cursor() as cursor:
             cursor.execute(f"""INSERT INTO keyword (keyword, created_date, modified_date)

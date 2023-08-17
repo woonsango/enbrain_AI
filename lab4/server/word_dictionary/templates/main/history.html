@@ -30,6 +30,7 @@
               <th>사용 여부</th>
               <th>생성일자</th>
               <th>수정일자</th>
+              <th>URL</th>
             </tr>
           </thead>
   
@@ -41,6 +42,7 @@
                 <td>{{row.1}}</td>
                 <td>{{row.2}}</td>
                 <td>{{row.3}}</td>
+                <td>url 부분</td>
               </tr>
               {% endfor %}
           </tbody>
@@ -50,13 +52,12 @@
 
 
       <script>
-        // 세션 스토리지에서 데이터 불러오기
+        // keyword.html에서 저장했던 세션 스토리지에서 데이터 불러오기
         const saveKeyword = sessionStorage.getItem("keyword");
+        const saveWord = sessionStorage.getItem("word")
 
-        // 검색어 값이 있을 경우, 키워드 부분에 넣기
-        if (saveKeyword) {
-            document.getElementById("select-word").textContent = "키워드 '" + saveKeyword + "'의 단어 수정 내역";
-        }
+        // 값이 있을 경우, 키워드와 단어 부분에 넣기
+        document.getElementById("select-word").textContent = "키워드 '" + (saveKeyword ? saveKeyword : '') + "'의 단어 '" + (saveWord ? saveWord : '') + "' 수정 내역";
       </script>
 </body>
 </html>
