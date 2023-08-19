@@ -178,8 +178,6 @@ def getWord(text):
         #         similar_word.append([token, cnt_dict[token], url])
         
         cnt += 1
-        if(cnt%2==0):
-            break
         if cnt%16==0:
             time.sleep(1)
     for word_info in similar_word:
