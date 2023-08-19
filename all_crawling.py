@@ -177,7 +177,6 @@ def getWord(text):
         
         cnt += 1
         if cnt%16==0:
-            break
             time.sleep(1)
     for word_info in similar_word:
             word, count, url = word_info
