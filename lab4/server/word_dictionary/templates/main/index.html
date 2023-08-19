@@ -3,8 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <button onclick="sendPost('/', {'hungry': 'me too'})">버튼</button>
 </head>
 <body>
     장고 첫페이지!
+    <script>
+        function sendPost(url, params) {
+            var form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', url);
+            form.innerHTML = '{% csrf_token %}'
+            document.charset = "UTF-8";
+
+            for (var key in params) {
+                var hiddenField = document.createElement('input');
+                hiddenField.setAttribute('type', 'hidden');
+                hiddenField.setAttribute('name', key);
+                hiddenField.setAttribute('value', params[key]);
+                form.appendChild(hiddenField);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
 </body>
 </html>

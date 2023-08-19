@@ -4,9 +4,42 @@ from .crawling_all import getWord
 
 # Create your views here.
 def index(request):
+    if request.method == 'POST':
+        print(request.POST['hungry'])
     return render(request,'main/index.html')
 
 def check(request):
+
+    if request.method == 'POST':
+        print(request.POST)
+        print(request.POST['query'])
+        print(request.POST['addDateStart'])
+        print(request.POST['addDateEnd'])
+        print(request.POST['modifyDateStart'])
+        print(request.POST['modifyDateEnd'])
+        print(request.POST['frequencyStart'])
+        print(request.POST['frequencyEnd'])
+
+        with connection.cursor() as cursor:
+            cursor.execute(f"""with tmp as
+                                (
+                                select keyword_dictionary_id, sum(frequency) as frequency
+                                from dictionary_crawling_info
+                                group by keyword_dictionary_id
+                                )
+                                -- where keyword_dictionary_id = 42 ;
+                                SELECT d.id, d.word, d.usable, cast(cast(d.created_date as date) as char), cast(cast(d.modified_date as date) as char), tmp.frequency
+                                FROM mydb.keyword_dictionary d
+                                join mydb.keyword k on d.keyword_id = k.id
+                                join tmp on d.id = tmp.keyword_dictionary_id
+                                where k.keyword = '{request.POST['query']}' and 
+                                (((d.created_date >= '{request.POST['addDateStart']}') and (d.created_date <= '{request.POST['addDateEnd']}')) and 
+                                ((d.modified_date >= '{request.POST['modifyDateStart']}') and (d.modified_date <= '{request.POST['modifyDateEnd']}'))) and 
+                                (tmp.frequency >= {request.POST['frequencyStart']} and tmp.frequency <= {request.POST['frequencyEnd']})
+                                order by 6 desc ;""")
+            rows = cursor.fetchall()
+            print(rows)
+        return render(request, 'main/check.html', {"rows":rows, 'keyword':request.POST['query']})
 
     word = request.GET.get('query')
 
@@ -87,6 +120,20 @@ def keywordCollection(request):
     return render(request, 'main/keywordCollection.html', {"keyword": keyword})
 
 def keywords(request):
+
+    if request.method == 'POST':
+        print(request.POST)
+        print(request.POST['addDateStart'])
+        print(request.POST['addDateEnd'])
+        print(request.POST['modifyDateStart'])
+        print(request.POST['modifyDateEnd'])
+        with connection.cursor() as cursor:
+            cursor.execute(f"""select keyword, cast(cast(created_date as date) as char), cast(cast(modified_date as date) as char)
+                            from keyword
+                            where ((created_date >= '{request.POST['addDateStart']}') and (created_date <= '{request.POST['addDateEnd']}')) and ((modified_date >= '{request.POST['modifyDateStart']}') and (modified_date <= '{request.POST['modifyDateEnd']}'));""")
+            rows = cursor.fetchall()
+            print(rows)
+            return render(request, 'main/keywords.html', {"words":rows})
 
     #db 불러오기
     with connection.cursor() as cursor:

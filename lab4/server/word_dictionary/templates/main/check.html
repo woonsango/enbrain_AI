@@ -69,7 +69,11 @@
 
   <div class="container" style="padding-top: 5%;">
     <div class="input-container">
+      {% if keyword %}
+      <h1 id="select-word">{{keyword}}</h1>
+      {% else %}
       <h1 id="select-word">키워드</h1>
+      {% endif %}
     </div>
   </div>
 
@@ -125,9 +129,9 @@
             <th class="modal-t">빈도수</th>
             <td class="modal-t">
               <div class="date-container">
-                <input type="input" id="modify-date-start">
+                <input type="input" id="frequency-start">
                 <p style="padding: 0% 3%;"> ~ </p>
-                <input type="input" id="modify-date-end">
+                <input type="input" id="frequency-end">
               </div>
             </td>
           </tr>
@@ -203,25 +207,53 @@
       }
 
 
+      // server로 데이터 보내기 위한 함수
+      function sendPost(url, params) {
+            var form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', url);
+            form.innerHTML = '{% csrf_token %}'
+            document.charset = "UTF-8";
 
+            for (var key in params) {
+                var hiddenField = document.createElement('input');
+                hiddenField.setAttribute('type', 'hidden');
+                hiddenField.setAttribute('name', key);
+                hiddenField.setAttribute('value', params[key]);
+                form.appendChild(hiddenField);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
 
   // 모달창
-      // 모달 열기
+    // 모달 열기
       const openModalBtn = document.getElementById('open-modal-btn');
       const modal = document.getElementById('modal');
-      openModalBtn.addEventListener('click', () => {
-        if (!isActionInProgress) { // 다른 기능 동작 중이 아닐 때만 모달 열기
-          modal.classList.add('show');
-        }
-      });
+      openModalBtn.addEventListener('click', () => {modal.classList.add('show');});
 
-      // 모달 닫기
+    // 모달 닫기
       const closeModalBtn = document.getElementById('close-modal-btn');
       closeModalBtn.addEventListener('click', () => {modal.classList.remove('show');});
 
-      // 검색 필터 적용 기능 구현해야 함
+    // 적용 버튼 클릭 시, 검색 필터 적용
       const applyBtn = document.getElementById('apply-btn');
-      // applyBtn.addEventListener('click', () => {});
+      applyBtn.addEventListener('click', () => {
+        var selectedUsage = document.querySelector('input[name="usage"]:checked').value;   // 사용여부 값
+        const addDateStart = document.getElementById('add-date-start').value;   // 생성일자 시작 날짜
+        const addDateEnd = document.getElementById('add-date-end').value;   // 생성일자 끝 날짜
+
+        const modifyDateStart = document.getElementById('modify-date-start').value;   // 수정일자 시작 날짜
+        const modifyDateEnd = document.getElementById('modify-date-end').value;   // 수정일자 끝 날짜
+
+        var frequencyStart = document.getElementById('frequency-start').value;   // 빈도수 시작 범위
+        var frequencyEnd = document.getElementById('frequency-end').value;   // 빈도수 끝 범위
+
+        console.log(saveKeyword)
+
+        sendPost('/check', {'query':saveKeyword, 'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd, 'frequencyStart': frequencyStart, 'frequencyEnd': frequencyEnd})
+      });
 
 
 
@@ -511,4 +543,3 @@
     </script>
 </body>
 </html>
-
