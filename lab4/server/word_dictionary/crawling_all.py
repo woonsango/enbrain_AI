@@ -2,6 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 from kiwipiepy import Kiwi
 import time
+import re
+
+def remove_ref_tags(text):
+    pattern = r'<ref>.*?</ref>'
+    cleaned_text = re.sub(pattern, '', text, flags=re.DOTALL)
+    return cleaned_text
+
 def get_search_results(search_query):
     nownum = 2000
     search_url = "https://ko.wikipedia.org/w/index.php?search=" + search_query + "&title=특수:검색&profile=default&fulltext=1&ns0=1&offset=0&limit=2000"
@@ -26,7 +33,7 @@ def get_search_results(search_query):
             search_results.append(title)
     
     # 2번째 검색부터 반복 
-    while(nownum < totalnum) :
+    while(nownum < totalnum):
         nownum = str(nownum) #str
         search_url = "https://ko.wikipedia.org/w/index.php?search=" + search_query + "&title=특수:검색&profile=default&fulltext=1&ns0=1&offset=" + nownum + "&limit=2000"
         response = requests.get(search_url)
@@ -58,6 +65,7 @@ def tokenizing(text):
     text_data, url = getWikiData(text)
     kiwi = Kiwi()
     kiwi.prepare()
+    text_data['parse']['wikitext'] = remove_ref_tags(text_data['parse']['wikitext'])
     index = text_data['parse']['wikitext'].find("== 각주 ==")
     if(index != -1):
           text_data['parse']['wikitext'] = text_data['parse']['wikitext'][:index]
@@ -76,7 +84,6 @@ def make_word(result):
     form_num = 0
     cnt_dict = {}
     cosine = {}
-
     for form, tag, start, length in result:
         # Nouns
         if tag in ['NNP', 'NNG']:
@@ -144,60 +151,49 @@ def make_word(result):
 # 키워드와 관련된 유사도 높은 결과 단어 추출
 def getWord(text):
     search_results = get_search_results(text)
-    page_result = {}
+    similar_word= []
     result ={}
+    grouped_result = []
+    word_group = {}
     cnt = 0
-    print(type(search_results))
-    print(len(search_results))
-    for search in search_results[:3]:
-        similar_word = []
+    for search in search_results[:5]:
         content, url = tokenizing(search)
         cosine, made_words,cnt_dict = make_word(content)
         made_words_set = set(made_words)
         final_words_list = list(made_words_set)
+        final_words_list = [token for token in final_words_list if "'" not in token]
         for token in final_words_list:
             # count = 0
             # if token in ko_model.wv.key_to_index:
                 # cosine_sim = cosine_similarity([ko_model.wv[text_data['parse']['title']]], [ko_model.wv[token]])
-                if len(token) >1:
+                if len(token) >1 and token in cnt_dict:
                     # print(f'{token}: {cosine_sim}')
                     similar_word.append([token, cnt_dict[token],url]) 
-        for token in cosine:
-            if len(token) > 1:
-                # count = text_wikitext.count(token[0])
-                # print(f'{token}: {cosine[token]}')
-                similar_word.append([token, cnt_dict[token], url])
-        page_result[search] = similar_word
-        cnt +=1
+        # for token in cosine:
+        #     if len(token) > 1:
+        #         # count = text_wikitext.count(token[0])
+        #         # print(f'{token}: {cosine[token]}')
+        #         similar_word.append([token, cnt_dict[token], url])
+        
+        cnt += 1
         if cnt%16==0:
             time.sleep(1)
-    result[text] = page_result
-    return result
+    for word_info in similar_word:
+            word, count, url = word_info
+            if word not in word_group:
+                word_group[word] = [count], [url]
+            else:
+                word_group[word][0].append(count)
+                word_group[word][1].append(url)
+
+    for word, (counts, urls) in word_group.items():
+        grouped_result.append([word, counts, urls])
+    return grouped_result
 
 if __name__ == '__main__' :
     result = getWord("민법")
-    # print(result)
-    for key in result:
-        print(key)
-        for page in result[key]:
-             print(page)
-             for data in result[key][page]:
-                 print(data)
-    # print(result['한국사']['한국사_연표'])
+    print(result)
     # import pickle
     # import gzip
     # with gzip.open('first_crawling', 'wb') as f:
     #     pickle.dump(result, f)
-    # print(len(result))
-# search_query = "민법"
-# start = time.time()
-# search_results = get_search_results(search_query)
-# finish = time.time()
-
-
-# print(search_results)
-# print("단어 개수 : " ,len(search_results))
-# print("걸린 시간 : ",finish - start)
-
-#한 번에 많은 단어 할 수록 시간 단축, limit 최대 5000
-#검색 한 번에 알 수 있는 최대 관련 검색어 10000개
