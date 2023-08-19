@@ -125,9 +125,9 @@
             <th class="modal-t">빈도수</th>
             <td class="modal-t">
               <div class="date-container">
-                <input type="input" id="modify-date-start">
+                <input type="input" id="frequency-start">
                 <p style="padding: 0% 3%;"> ~ </p>
-                <input type="input" id="modify-date-end">
+                <input type="input" id="frequency-end">
               </div>
             </td>
           </tr>
@@ -206,22 +206,32 @@
 
 
   // 모달창
-      // 모달 열기
+    // 모달 열기
       const openModalBtn = document.getElementById('open-modal-btn');
       const modal = document.getElementById('modal');
-      openModalBtn.addEventListener('click', () => {
-        if (!isActionInProgress) { // 다른 기능 동작 중이 아닐 때만 모달 열기
-          modal.classList.add('show');
-        }
-      });
+      openModalBtn.addEventListener('click', () => {modal.classList.add('show');});
 
-      // 모달 닫기
+    // 모달 닫기
       const closeModalBtn = document.getElementById('close-modal-btn');
       closeModalBtn.addEventListener('click', () => {modal.classList.remove('show');});
 
-      // 검색 필터 적용 기능 구현해야 함
+    // 적용 버튼 클릭 시, 검색 필터 적용
       const applyBtn = document.getElementById('apply-btn');
-      // applyBtn.addEventListener('click', () => {});
+      applyBtn.addEventListener('click', () => {
+        var selectedUsage = document.querySelector('input[name="usage"]:checked').value;   // 사용여부 값
+        const addDateStart = new Date(document.getElementById('add-date-start').value);   // 생성일자 시작 날짜
+        const addDateEnd = new Date(document.getElementById('add-date-end').value);   // 생성일자 끝 날짜
+        addDateStart.setHours(0, 0, 0, 0);   // 시간 부분 0으로 설정 (없으면 09:00:00로 나옴)
+        addDateEnd.setHours(0, 0, 0, 0);
+
+        const modifyDateStart = new Date(document.getElementById('modify-date-start').value);   // 생성일자 시작 날짜
+        const modifyDateEnd = new Date(document.getElementById('modify-date-end').value);   // 수정일자 끝 날짜
+        modifyDateStart.setHours(0, 0, 0, 0);
+        modifyDateEnd.setHours(0, 0, 0, 0);
+
+        var frequencyStart = document.getElementById('frequency-start').value;   // 빈도수 시작 범위
+        var frequencyEnd = document.getElementById('frequency-end').value;   // 빈도수 끝 범위
+      });
 
 
 
