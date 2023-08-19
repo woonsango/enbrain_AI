@@ -34,7 +34,7 @@
         .date-container {display: flex; align-items: center;}
         table.modal-table {border: none; white-space: nowrap; vertical-align: middle;} /* white-space: nowrap -> 텍스트 줄바꿈 방지 */
         .modal-t {border: none; font-size: small; padding: 15px; text-align: center;}
-        .apply-button {border: none; border-radius: 10px; width: 100%; min-height: 25px; margin-top: 2%;}
+        .apply-button {border: none; border-radius: 10px; width: 100%; min-height: 25px; margin-top: 2%; cursor: pointer;}
         .close-button {color: #aaaaaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;}
         .close-button:hover {color: #000000;}
 
@@ -178,55 +178,79 @@
 
 
   // 모달창
-      // 모달 열기
+    // 모달 열기
       const openModalBtn = document.getElementById('open-modal-btn');
       const modal = document.getElementById('modal');
       openModalBtn.addEventListener('click', () => {modal.classList.add('show');});
 
-      // 모달 닫기
+    // 모달 닫기
       const closeModalBtn = document.getElementById('close-modal-btn');
       closeModalBtn.addEventListener('click', () => {modal.classList.remove('show');});
 
-      // 적용 버튼 클릭 시, 검색 필터 적용
-      // const modalApply = document.getElementById('apply-btn');
-      // modalApply.addEventListener('click', () => {
-      //   // 생성일자
-      //   const addDateStart = new Date(document.getElementById('add-date-start').value);
-      //   const addDateEnd = new Date(document.getElementById('add-date-end').value);
-      //   addDateStart.setHours(0, 0, 0, 0); // 시간 부분 0으로 설정 (없으면 09:00:00로 나옴)
-      //   addDateEnd.setHours(0, 0, 0, 0);
+    // 적용 버튼 클릭 시, 검색 필터 적용
+      const modalApply = document.getElementById('apply-btn');
+      modalApply.addEventListener('click', () => {
+        const tableRows = document.querySelectorAll('#table tbody tr');
 
-      //   console.log(addDateStart);
-      //   console.log(addDateEnd);
+        let filteredRows = Array.from(tableRows);
+        console.log("before filteredRows: ", filteredRows)
 
-      //   // 수정일자
-      //   const modifyDateStart = new Date(document.getElementById('modify-date-start').value);
-      //   const modifyDateEnd = new Date(document.getElementById('modify-date-end').value);
-      //   modifyDateStart.setHours(0, 0, 0, 0);
-      //   modifyDateEnd.setHours(0, 0, 0, 0);
+        const addDateStart = new Date(document.getElementById('add-date-start').value);
+        const addDateEnd = new Date(document.getElementById('add-date-end').value);
+        addDateStart.setHours(0, 0, 0, 0);
+        addDateEnd.setHours(0, 0, 0, 0);
 
-      //   console.log(modifyDateStart);
-      //   console.log(modifyDateEnd);
+        const modifyDateStart = new Date(document.getElementById('modify-date-start').value);
+        const modifyDateEnd = new Date(document.getElementById('modify-date-end').value);
+        modifyDateStart.setHours(0, 0, 0, 0);
+        modifyDateEnd.setHours(0, 0, 0, 0);
 
-      //   const tableRows = document.querySelectorAll('#table tbody tr');
+        if (addDateStart != "Invalid Date" && addDateEnd != "Invalid Date" && modifyDateStart != "Invalid Date" && modifyDateEnd != "Invalid Date") {
+          console.log("all")
+          console.log(addDateStart)
+          // 생성일자 필터링
+          filteredRows = filteredRows.filter(row => {
+            const addDate = new Date(row.cells[1].textContent);
+            return (!addDateStart || addDate >= addDateStart) && (!addDateEnd || addDate <= addDateEnd);
+          });
 
-      //   tableRows.forEach(row => {
-      //     // 생성일자 열의 내용 (YYYY-MM-DD HH:MM:SS")
-      //     const createDate = new Date(row.cells[1].textContent);
-      //     createDate.setHours(0, 0, 0, 0);   // 시간 부분 0으로 설정
-          
-      //     // 수정일자 열의 내용
-      //     const modifyDate = new Date(row.cells[2].textContent);
-      //     modifyDate.setHours(0, 0, 0, 0);
+          // 수정일자 필터링
+          filteredRows = filteredRows.filter(row => {
+            const modifyDate = new Date(row.cells[2].textContent);
+            return (!modifyDateStart || modifyDate >= modifyDateStart) && (!modifyDateEnd || modifyDate <= modifyDateEnd);
+          });
+        } else if (addDateStart != "Invalid Date" && addDateEnd != "Invalid Date") {
+          console.log("add only")
+          // 생성일자 필터링
+          filteredRows = filteredRows.filter(row => {
+            const addDate = new Date(row.cells[1].textContent);
+            return (!addDateStart || addDate >= addDateStart) && (!addDateEnd || addDate <= addDateEnd);
+          });
+        } else if (modifyDateStart != "Invalid Date" && modifyDateEnd != "Invalid Date") {
+          console.log("modify")
+          // 수정일자 필터링
+          filteredRows = filteredRows.filter(row => {
+            const modifyDate = new Date(row.cells[2].textContent);
+            return (!modifyDateStart || modifyDate >= modifyDateStart) && (!modifyDateEnd || modifyDate <= modifyDateEnd);
+          });
+        } else {
+          // 아무 것도 선택되지 않았을 때 경고창 표시
+          alert('적어도 하나의 검색 필터를 선택하세요.');
+        }
 
-      //     if ((!addDateStart || createDate >= addDateStart) && (!addDateEnd || createDate <= addDateEnd) &&
-      //       (!modifyDateStart || modifyDate >= modifyDateStart) && (!modifyDateEnd || modifyDate <= modifyDateEnd)) {
-      //       row.style.display = 'table-row';
-      //     } else {
-      //       row.style.display = 'none';
-      //     }
-      //   });
-      // });
+        console.log("after filteredRows: ", filteredRows)
+
+        // 결과를 테이블에 적용
+        tableRows.forEach(row => {
+          if (filteredRows.includes(row)) {
+            row.style.display = 'table-row';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+
+
 
 
 

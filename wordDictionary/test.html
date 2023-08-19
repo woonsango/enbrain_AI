@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <title>CSS</title>
+		<style>
+			input[id="cb1"] + label {
+                color: #aaaaaa;
+				cursor: pointer;
+			}
+			input[id="cb1"]:checked + label {
+                color: #000000
+			}
+			input[id="cb1"] {
+				display: none;
+			}
+		</style>
+  </head>
+  <body>
+    <h3>Checkbox</h3>
+    <input type="checkbox" id="cb1">
+    <label for="cb1"> 체크하기 </label>
+  </body>
+</html>
