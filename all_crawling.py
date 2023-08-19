@@ -161,14 +161,12 @@ def getWord(text):
         cosine, made_words,cnt_dict = make_word(content)
         made_words_set = set(made_words)
         final_words_list = list(made_words_set)
-        pattern = r'"'
-        final_words_list = [re.sub(pattern, '', token) for token in final_words_list]
-        
+        final_words_list = [token for token in final_words_list if "'" not in token]
         for token in final_words_list:
             # count = 0
             # if token in ko_model.wv.key_to_index:
                 # cosine_sim = cosine_similarity([ko_model.wv[text_data['parse']['title']]], [ko_model.wv[token]])
-                if len(token) >1:
+                if len(token) >1 and token in cnt_dict:
                     # print(f'{token}: {cosine_sim}')
                     similar_word.append([token, cnt_dict[token],url]) 
         # for token in cosine:
@@ -179,6 +177,7 @@ def getWord(text):
         
         cnt += 1
         if cnt%16==0:
+            break
             time.sleep(1)
     for word_info in similar_word:
             word, count, url = word_info
@@ -194,6 +193,7 @@ def getWord(text):
 
 if __name__ == '__main__' :
     result = getWord("한국사")
+    print(result)
     import pickle
     import gzip
     with gzip.open('first_crawling', 'wb') as f:
