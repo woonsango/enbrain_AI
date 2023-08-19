@@ -160,12 +160,12 @@
         <tbody style="cursor: pointer;">
           {% for row in rows %}
             <tr onclick="javascript:select_table(this);"> <!-- 첫 번째 줄 시작 -->
-              <td>{{row.0}}</td>
               <td>{{row.1}}</td>
               <td>{{row.2}}</td>
               <td>{{row.3}}</td>
+              <td>{{row.4}}</td>
               <td>url 부분</td>
-              <td>빈도수 부분</td>
+              <td>{{row.5}}</td>
               <td><button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button></td>
             </tr>
             {% endfor %}
