@@ -170,9 +170,11 @@
               <td>{{row.2}}</td>
               <td>{{row.3}}</td>
               <td>{{row.4}}</td>
-              {% for url in urls %}
-              <td><a href="url" target="_blank">{{url|slice:"30:"}}</a></td>
-              {% endfor %}
+              <td>
+                {%for url in row.6 %}
+                <a href={{url}} target="_blank">{{url|slice:"30:"}}</a><br>
+                {% endfor %}
+              </td>
               <td>{{row.5}}</td>
               <td><button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button></td>
             </tr>
@@ -454,7 +456,6 @@
             // 기존 값 저장
             var word = cells[0].innerText;
             var usage = cells[1].innerText;
-            var modify = cells[3].innerText;
             var url = cells[4].innerText;
 
             // 수정할 내용을 입력창으로 변경
@@ -463,13 +464,12 @@
             cells[1].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (usage !== undefined ? usage : '') +' ">';
             cells[4].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (url !== undefined ? url : '') +' ">';
 
-            // 취소 버튼 클릭 이벤트 추가
+            // 취소 버튼 클릭 이벤트 추가                                  ->> 수정하기!!!
             var cancelBtn = cells[0].querySelector('.close-row-btn');
             cancelBtn.addEventListener('click', function() {
               // 입력창을 기존값으로 변경
               cells[0].innerHTML = word;
               cells[1].innerHTML = usage;
-              cells[3].innerHTML = modify;
               cells[4].innerHTML = url;
               console.log(cells);
               modifyMoveBtn.disabled = false;
