@@ -175,25 +175,7 @@
         }
       }
 
-      // server로 데이터 보내기 위한 함수
-      function sendPost(url, params) {
-            var form = document.createElement('form');
-            form.setAttribute('method', 'post');
-            form.setAttribute('action', url);
-            form.innerHTML = '{% csrf_token %}'
-            document.charset = "UTF-8";
 
-            for (var key in params) {
-                var hiddenField = document.createElement('input');
-                hiddenField.setAttribute('type', 'hidden');
-                hiddenField.setAttribute('name', key);
-                hiddenField.setAttribute('value', params[key]);
-                form.appendChild(hiddenField);
-            }
-
-            document.body.appendChild(form);
-            form.submit();
-        }
 
   // 모달창
     // 모달 열기
@@ -208,17 +190,15 @@
     // 적용 버튼 클릭 시, 검색 필터 적용
       const modalApply = document.getElementById('apply-btn');
       modalApply.addEventListener('click', () => {
-        const addDateStart = document.getElementById('add-date-start').value;   // 생성일자 시작 날짜
-        const addDateEnd = document.getElementById('add-date-end').value;   // 생성일자 끝 날짜
+        const addDateStart = new Date(document.getElementById('add-date-start').value);   // 생성일자 시작 날짜
+        const addDateEnd = new Date(document.getElementById('add-date-end').value);   // 생성일자 끝 날짜
+        addDateStart.setHours(0, 0, 0, 0);   // 시간 부분 0으로 설정 (없으면 09:00:00로 나옴)
+        addDateEnd.setHours(0, 0, 0, 0);
 
-        const modifyDateStart = document.getElementById('modify-date-start').value;   // 수정일자 시작 날짜
-        const modifyDateEnd = document.getElementById('modify-date-end').value ;   // 수정일자 끝 날짜
-        
-        console.log(addDateStart)
-        console.log(addDateEnd)
-        console.log(modifyDateStart)
-        console.log(modifyDateEnd)
-        sendPost('/keywords', {'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd})
+        const modifyDateStart = new Date(document.getElementById('modify-date-start').value);   // 수정일자 시작 날짜
+        const modifyDateEnd = new Date(document.getElementById('modify-date-end').value);   // 수정일자 끝 날짜
+        modifyDateStart.setHours(0, 0, 0, 0);
+        modifyDateEnd.setHours(0, 0, 0, 0);
       });
 
 
@@ -315,7 +295,7 @@
           cancelBtn.addEventListener('click', function() {
             newRow.remove(); // 해당 행을 삭제
             setButtonActionInProgress(false); // 버튼 활성화
-            rowCount()   // 총 키워드 개수 업데이트
+            rowCount()   // 총 키워드 개수 업데이트                   -> 이 부분 수정함
           });
 
           // 클릭 이벤트 추가
