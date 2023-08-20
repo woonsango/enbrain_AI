@@ -124,7 +124,7 @@ def check(request):
                                                             where keyword = '{word}'))
                             order by frequency desc
                             limit 3 ;""")
-            urls = "\r\n".join([url[0] for url in cursor.fetchall()])
+            urls = [url[0] for url in cursor.fetchall()]
             tmp = list(word1)
             tmp.append(urls)
             rows_list.append(tmp)
