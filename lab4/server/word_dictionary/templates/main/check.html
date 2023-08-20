@@ -179,15 +179,18 @@
 
 
     <script>
+    // history.html에 데이터 넘겨주기 위해 세션 스토리지에 데이터 저장
+      const tdWord = word.querySelector('td:first-child').textContent;
+        console.log(tdWord);
+        sessionStorage.setItem("word", tdWord);
+
+
+
+
   // 새 페이지(히스토리 창)로 이동
       function moveHistory(word) {
         const open = window.open("about:blank")
         open.location.href = "/history"
-
-        // history.html에 데이터 넘겨주기 위해 세션 스토리지에 데이터 저장
-        const tdWord = word.querySelector('td:first-child').textContent;
-        console.log(tdWord);
-        sessionStorage.setItem("word", tdWord);
       }
 
 
@@ -364,6 +367,7 @@
           cancelBtn.addEventListener('click', function() {
             newRow.remove(); // 해당 행을 삭제
             setButtonActionInProgress(false); // 버튼 활성화
+            rowCount()   // 총 키워드 개수 업데이트
           });
 
           // 클릭 이벤트 추가
