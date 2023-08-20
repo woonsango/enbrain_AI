@@ -122,18 +122,51 @@ def keywordCollection(request):
 def keywords(request):
 
     if request.method == 'POST':
-        print(request.POST)
-        print(request.POST['addDateStart'])
-        print(request.POST['addDateEnd'])
-        print(request.POST['modifyDateStart'])
-        print(request.POST['modifyDateEnd'])
-        with connection.cursor() as cursor:
-            cursor.execute(f"""select keyword, cast(cast(created_date as date) as char), cast(cast(modified_date as date) as char)
-                            from keyword
-                            where ((created_date >= '{request.POST['addDateStart']}') and (created_date <= '{request.POST['addDateEnd']}')) and ((modified_date >= '{request.POST['modifyDateStart']}') and (modified_date <= '{request.POST['modifyDateEnd']}'));""")
-            rows = cursor.fetchall()
-            print(rows)
-            return render(request, 'main/keywords.html', {"words":rows})
+        print(request.POST['mode'])
+        if request.POST['mode'] == 'filter':
+            print(request.POST)
+            print(request.POST['addDateStart'])
+            print(request.POST['addDateEnd'])
+            print(request.POST['modifyDateStart'])
+            print(request.POST['modifyDateEnd'])
+            with connection.cursor() as cursor:
+                cursor.execute(f"""select keyword, cast(cast(created_date as date) as char), cast(cast(modified_date as date) as char)
+                                from keyword
+                                where ((created_date >= '{request.POST['addDateStart']}') and (created_date <= '{request.POST['addDateEnd']}')) and ((modified_date >= '{request.POST['modifyDateStart']}') and (modified_date <= '{request.POST['modifyDateEnd']}'));""")
+                rows = cursor.fetchall()
+                print(rows)
+                return render(request, 'main/keywords.html', {"words":rows})
+        elif request.POST['mode'] == 'add':
+            print(request.POST)
+            print(request.POST['finalWord'])
+            with connection.cursor() as cursor:
+                # 존재하는 키워드 출력 query
+                cursor.execute(f"""select keyword
+                                from keyword ;""")
+                exit_keyword = [i[0]for i in cursor.fetchall()]
+                print(exit_keyword)
+                # 이미 존재하는 키워드일 때 실행
+                if request.POST['finalWord'] not in exit_keyword:
+                    cursor.execute(f"""INSERT INTO keyword (keyword, created_date, modified_date)
+                                VALUES ("{request.POST['finalWord']}", NOW(), NOW()) ;""")
+        elif request.POST['mode'] == 'delete':
+            print(request.POST)
+            with connection.cursor() as cursor:
+                for word in request.POST['delete_word'].split(','):
+                    print(word)
+                    cursor.execute(f"""select k.id
+                                    from keyword_dictionary dict
+                                    join keyword k on dict.keyword_id = k.id
+                                    where k.keyword = '{word}' ;""")
+                    count = len(cursor.fetchall())
+                    print(count)
+                    if count > 0:
+                        print('삭제할 수 없음')
+                    else:
+                        cursor.execute(f"""DELETE FROM keyword
+                                        WHERE keyword = '{word}' ;""")
+                        print(f'{word} 삭제 성공')
+                        
 
     #db 불러오기
     with connection.cursor() as cursor:

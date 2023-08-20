@@ -218,7 +218,7 @@
         console.log(addDateEnd)
         console.log(modifyDateStart)
         console.log(modifyDateEnd)
-        sendPost('/keywords', {'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd})
+        sendPost('/keywords', {'mode':'filter', 'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd})
       });
 
 
@@ -355,6 +355,9 @@
 
             addMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
             setButtonActionInProgress(false); // 버튼 활성화
+            // 행 추가 여기에 넣기
+            console.log(finalWord) ;
+            sendPost('/keywords', {'mode': 'add', 'finalWord':finalWord}) ;
         }
       }
 
@@ -374,12 +377,23 @@
             for (var i = 0; i < selectedRows.length; i++) {
               table.deleteRow(selectedRows[i].rowIndex);
             }
-            selectedRows = [];
 
             rowCount()   // 총 키워드 개수 업데이트
           }
 
           setButtonActionInProgress(false); // 버튼 활성화
+          // 행 삭제 여기에 넣기
+          var delete_word = [] ;
+          for (var i = 0 ; i < selectedRows.length ; i++) {
+            var row = selectedRows[i]
+            // console.log(row) ;
+            // console.log(row.querySelector('td').innerHTML) ;
+            delete_word[i] = row.querySelector('td').innerHTML
+          }
+          console.log(delete_word) ;
+          sendPost('/keywords', {'mode': 'delete', 'delete_word': [delete_word]}) ;
+          selectedRows = [];
+
         }
       }
     </script>
