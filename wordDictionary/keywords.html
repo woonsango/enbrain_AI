@@ -30,7 +30,7 @@
 
         /* 모달 스타일 */
         .modal {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);}
-        .modal-content {background-color: #ffffff; border-radius: 5px; padding: 20px; max-width: 415px; margin: 15% auto; white-space: nowrap;}
+        .modal-content {background-color: #ffffff; border-radius: 5px; padding: 20px; width: 40%; max-width: 415px; margin: 10% auto; white-space: nowrap;}        /* -> 수정할 부분 */
         .date-container {display: flex; align-items: center;}
         table.modal-table {border: none; white-space: nowrap; vertical-align: middle;} /* white-space: nowrap -> 텍스트 줄바꿈 방지 */
         .modal-t {border: none; font-size: small; padding: 15px; text-align: center;}
@@ -287,7 +287,7 @@
 
     var addMoveBtn;   // 용어단어집 이동 버튼 활성화를 위한 변수
 
-  // 2. 행 추가 함수   -> 취소 기능 만들기
+  // 2. 행 추가 함수
       function add_table() {
         if (!isActionInProgress) {
           setButtonActionInProgress(true);   // 버튼 동작 중으로 변경
@@ -327,7 +327,7 @@
           addMoveBtn = newRow.querySelector('.move-button');
           addMoveBtn.disabled = true;
 
-          // 선택한 행의 입력창에서 수정 완료 시, 다시 텍스트로 변경하도록 함
+          // 선택한 행의 입력창에서 추가 완료 시, 다시 텍스트로 변경하도록 함
           var inputs = newRow.getElementsByTagName('input');
           inputs[0].addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
