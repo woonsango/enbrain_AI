@@ -119,7 +119,9 @@ def check(request):
                             from dictionary_crawling_info
                             where keyword_dictionary_id = (select id
                                                             from keyword_dictionary
-                                                            where word = '{word1[1]}')
+                                                            where word = '{word1[1]}' and keyword_id = (select id
+                                                            from keyword
+                                                            where keyword = '{word}'))
                             order by frequency desc
                             limit 3 ;""")
             urls = "\r\n".join([url[0] for url in cursor.fetchall()])
