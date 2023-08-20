@@ -168,7 +168,7 @@
               <td>{{row.2}}</td>
               <td>{{row.3}}</td>
               <td>{{row.4}}</td>
-              <td>url 부분</td>
+              <td><pre>{{row.6}}</pre></td>
               <td>{{row.5}}</td>
               <td><button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button></td>
             </tr>
@@ -179,15 +179,16 @@
 
 
     <script>
+
   // 새 페이지(히스토리 창)로 이동
       function moveHistory(word) {
-        const open = window.open("about:blank")
-        open.location.href = "/history"
-
         // history.html에 데이터 넘겨주기 위해 세션 스토리지에 데이터 저장
         const tdWord = word.querySelector('td:first-child').textContent;
         console.log(tdWord);
         sessionStorage.setItem("word", tdWord);
+
+        const open = window.open("about:blank")
+        open.location.href = "/history?keyword=" + saveKeyword + "&word=" + tdWord ;
       }
 
 
@@ -252,7 +253,7 @@
 
         console.log(saveKeyword)
 
-        sendPost('/check', {'query':saveKeyword, 'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd, 'frequencyStart': frequencyStart, 'frequencyEnd': frequencyEnd})
+        sendPost('/check', {'mode': 'filter', 'query':saveKeyword, 'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd, 'frequencyStart': frequencyStart, 'frequencyEnd': frequencyEnd})
       });
 
 
@@ -305,6 +306,7 @@
           target.classList.add('selected');
           // 이미 선택된 행인지 확인 후 추가
           if (selectedRows.indexOf(target) === -1) {
+            console.log(selectedRows)
             selectedRows.push(target);
           }
         } else {
@@ -351,12 +353,12 @@
 
           // 새로운 행에 기본값으로 추가
           cell1.innerHTML = '<button class="icon-button close-row-btn" style="margin-right: 20px;" onclick="cancelRow(this)">&times;</button>' +
-                            '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="단어">';
-          cell2.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="사용 여부">';
+                            '<input type="text" style="font-size: x-small" placeholder="단어">';
+          cell2.innerHTML = '<input type="text" style="font-size: x-small" placeholder="사용 여부">';
           cell3.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell4.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
-          cell5.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="url">';
-          cell6.innerHTML = '<input type="text" onkeydown="addSave(event, this)" style="font-size: x-small" placeholder="빈도수">';
+          cell5.innerHTML = '<input type="text" style="font-size: x-small" placeholder="url">';
+          cell6.innerHTML = '<input type="text" style="font-size: x-small" placeholder="빈도수">';
           cell7.innerHTML = '<button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button>';
 
           // 취소 버튼 클릭 이벤트 추가
@@ -364,6 +366,7 @@
           cancelBtn.addEventListener('click', function() {
             newRow.remove(); // 해당 행을 삭제
             setButtonActionInProgress(false); // 버튼 활성화
+            rowCount()   // 총 키워드 개수 업데이트
           });
 
           // 클릭 이벤트 추가
@@ -379,18 +382,22 @@
           var inputs = newRow.getElementsByTagName('input');
           inputs[0].addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
-              addSave(newRow);
+              addSave(event, newRow);
             }
           });
           inputs[1].addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
-              addSave(newRow);
-              console.log(inputs[4])
+              addSave(event, newRow);
             }
           });
           inputs[2].addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
-              addSave(newRow);
+              addSave(event, newRow);
+            }
+          });
+          inputs[3].addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+              addSave(event, newRow);
             }
           });
 
@@ -398,22 +405,29 @@
         }
 
         // 2-1. 행 추가 내용 저장
-        function addSave(newRow) {
+        function addSave(event, newRow) {
           // 입력창의 값을 텍스트로 변경하여 저장
           var inputs = newRow.getElementsByTagName('input');
           var finalWord = inputs[0].value;
           var finalUsage = inputs[1].value;
           var finalUrl = inputs[2].value;
+          var finalFrequency = inputs[3].value;
 
           var cells = newRow.cells;
           cells[0].innerHTML = finalWord;
           cells[1].innerHTML = finalUsage;
           cells[4].innerHTML = finalUrl;
+          cells[5].innerHTML = finalFrequency;
 
           addMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
           setButtonActionInProgress(false); // 버튼 활성화
 
-          console.log(inputs[3].value) ;
+          console.log(finalWord) ;
+          console.log(finalUsage) ;
+          console.log(finalUrl) ;
+          console.log(finalFrequency) ;
+          console.log(saveKeyword) ;
+          sendPost('/check', {'mode': 'add', 'query':saveKeyword, 'finalWord':finalWord, 'finalUsage': finalUsage, 'finalUrl':finalUrl, "finalFrequency": finalFrequency}) ;
         }
       }
 
@@ -499,6 +513,7 @@
 
       // 3-1. 행 수정 내용 저장
       function modifySave(cells, word, usage) {
+        console.log(word) ;
         // 입력창의 값을 텍스트로 변경하여 저장
         var finalWord = cells[0].getElementsByTagName('input')[0].value;
         var finalUsage = cells[1].getElementsByTagName('input')[0].value;
@@ -515,6 +530,11 @@
 
           modifyMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
           setButtonActionInProgress(false); // 버튼 활성화
+
+          console.log(finalWord) ;
+          console.log(finalUsage) ;
+          console.log(finalUrl) ;
+          sendPost('/check', {'mode': 'update', 'query': saveKeyword, 'beforeWord': word, 'finalWord': finalWord, 'finalUsage': finalUsage, 'finalUrl': finalUrl})
         }
       }
 
@@ -534,6 +554,16 @@
             for (var i = 0; i < selectedRows.length; i++) {
               table.deleteRow(selectedRows[i].rowIndex);
             }
+
+            var delete_word = [] ;
+            for (var i = 0 ; i < selectedRows.length ; i++) {
+              var row = selectedRows[i]
+              // console.log(row) ;
+              // console.log(row.querySelector('td').innerHTML) ;
+              delete_word[i] = row.querySelector('td').innerHTML
+            }
+            console.log(delete_word) ;
+
             selectedRows = [];
 
             rowCount()   // 총 단어 개수 업데이트
