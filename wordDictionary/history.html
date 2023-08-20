@@ -30,19 +30,17 @@
               <th>사용 여부</th>
               <th>생성일자</th>
               <th>수정일자</th>
-              <th>URL</th>
             </tr>
           </thead>
   
           <tbody style="cursor: pointer;">
-            {% for row in words %}
+            {% for row in rows %}
               <tr onclick="javascript:select_table(this);">
                 <td>{{forloop.counter}}</td>
                 <td>{{row.0}}</td>
                 <td>{{row.1}}</td>
                 <td>{{row.2}}</td>
                 <td>{{row.3}}</td>
-                <td>url 부분</td>
               </tr>
               {% endfor %}
           </tbody>
