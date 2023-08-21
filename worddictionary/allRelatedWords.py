@@ -1,8 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 from kiwipiepy import Kiwi
+from urllib.parse import quote
 import time
 import re
+import requests.exceptions
 
 # ref 태그 사이 내용 삭제
 def remove_ref_tags(text):
@@ -16,7 +18,7 @@ def get_search_results(search_query):
     search_url = "https://ko.wikipedia.org/w/index.php?search=" + search_query + "&title=특수:검색&profile=default&fulltext=1&ns0=1&offset=0&limit=2000"
     # limit : 한 페이지 당 몇 개의 단어를 가져올 것인지
     # offset : 몇 번째 단어부터 보여줄 것인지
-    # 먼저 2000개 찾고 총 개수 알아낸 다음 모든 단어 찾을 때까지 과정 반복
+    # 먼저 2000개 찾고 총 개수 알아낸 다음 모든 단어 찾을 때까지 과정 반복 
     
     response = requests.get(search_url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -61,12 +63,17 @@ def get_search_results(search_query):
 # 각 페이지 내용 api로 가져오기
 def getWikiData(search_results):
     wiki_url = "https://ko.wikipedia.org/wiki/" + search_results
+    encode_url = quote(search_results)
     headers = {'Content-Type': 'application/json'}
-    response = requests.get(wiki_url)
-    if response.status_code == 200:
-        url = "https://ko.wikipedia.org/w/api.php?action=parse&parse&page=" + search_results + "&prop=wikitext&formatversion=2&format=json"
-        response = requests.get(url, headers=headers)
-    return response.json(), wiki_url
+    try:
+        response = requests.get(wiki_url)
+        if response.status_code == 200:
+            url = "https://ko.wikipedia.org/w/api.php?action=parse&parse&page=" + encode_url + "&prop=wikitext&formatversion=2&format=json"
+            response = requests.get(url, headers=headers)
+            return response.json(), wiki_url
+    except requests.exceptions.ConnectionError:
+        time.sleep(1)
+        return getWikiData(search_results)
 
 # 페이지 내용 전처리 및 토크나이징
 def tokenizing(text):
@@ -93,7 +100,7 @@ def make_word(result):
     cnt_dict = {}
     cosine = {}
     for form, tag, start, length in result:
-
+        
         # Nouns (일반명사, 고유명사)
         if tag in ['NNP', 'NNG']:
 
@@ -153,7 +160,6 @@ def make_word(result):
                 #             cosine[temp_word] = cosine_sum
 
             cosine_list = []
-            cosine_sum = 0
             temp_word = ""
             bef_tag = ""
             bef_loc = 0
@@ -165,7 +171,6 @@ def make_word(result):
 def getWord(text):
     search_results = get_search_results(text)
     similar_word= []
-    result ={}
     grouped_result = []
     word_group = {}
     cnt = 0
@@ -190,9 +195,9 @@ def getWord(text):
         #         similar_word.append([token, cnt_dict[token], url])
         
         # 요청 나눠서 하기
-        cnt += 1
-        if cnt%16 == 0:
-            time.sleep(1)
+        # cnt += 1
+        # if cnt%16 == 0:
+        #     time.sleep(1)
     
     # 단어마다 페이지별 출현 횟수 및 url list에 넣기
     for word_info in similar_word:
@@ -208,7 +213,7 @@ def getWord(text):
     return grouped_result
 
 if __name__ == '__main__' :
-    result = getWord("한국사")
+    result = getWord("수학")
     print(result)
     import pickle
     import gzip 
