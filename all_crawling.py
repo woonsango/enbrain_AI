@@ -3,17 +3,21 @@ from bs4 import BeautifulSoup
 from kiwipiepy import Kiwi
 import time
 import re
+import requests.exceptions
 
+# ref 태그 사이 내용 삭제
 def remove_ref_tags(text):
     pattern = r'<ref>.*?</ref>'
     cleaned_text = re.sub(pattern, '', text, flags=re.DOTALL)
     return cleaned_text
 
+# 검색결과 나오는 소제목들 크롤링
 def get_search_results(search_query):
     nownum = 2000
     search_url = "https://ko.wikipedia.org/w/index.php?search=" + search_query + "&title=특수:검색&profile=default&fulltext=1&ns0=1&offset=0&limit=2000"
-    # limit이 몇 개씩 단어 보여주는지 알려주는거 offset이 시작번호 0으로 하면 처음부터 
-    # 먼저 2000개 정도 찾고 총 개수 알아낸 다음 그 때까지 과정 반복
+    # limit : 한 페이지 당 몇 개의 단어를 가져올 것인지
+    # offset : 몇 번째 단어부터 보여줄 것인지
+    # 먼저 2000개 찾고 총 개수 알아낸 다음 모든 단어 찾을 때까지 과정 반복 
     
     response = requests.get(search_url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -25,6 +29,7 @@ def get_search_results(search_query):
 
     search_results = []
 
+    # 첫번째 페이지 ~2000개 연관검색어 title 리스트에 저장
     for div in results:
         title_tag = div.find('a', attrs={'title': True})
         if title_tag:
@@ -32,35 +37,43 @@ def get_search_results(search_query):
             title = title.replace(' ', '_')
             search_results.append(title)
     
-    # 2번째 검색부터 반복 
+    # 연관 검색어가 2000개가 넘어가면 while문 반복 (2000번째 단어부터)
     while(nownum < totalnum):
         nownum = str(nownum) #str
-        search_url = "https://ko.wikipedia.org/w/index.php?search=" + search_query + "&title=특수:검색&profile=default&fulltext=1&ns0=1&offset=" + nownum + "&limit=2000"
+        search_url = "https://ko.wikipedia.org/w/index.php?search=" + search_query + "&title=특수:검색&profile=default&fulltext=1&ns0=1&offset=" + nownum + "&limit=4000"
         response = requests.get(search_url)
         soup = BeautifulSoup(response.text, "html.parser")
 
         results = soup.find_all('div', class_='mw-search-result-heading')
 
+        # 두번째 ~ 마지막 페이지 (2000 ~ 10000번째 단어) 연관검색어 title 페이지에 저장
         for div in results:
             title_tag = div.find('a', attrs={'title': True})
             if title_tag:
                 title = title_tag['title']
+                title = title.replace(' ', '_')
                 search_results.append(title)
 
         nownum = int(nownum) #int
         nownum += 4000
 
     return search_results
+
+# 각 페이지 내용 api로 가져오기
 def getWikiData(search_results):
     wiki_url = "https://ko.wikipedia.org/wiki/" + search_results
     headers = {'Content-Type': 'application/json'}
-    response = requests.get(wiki_url)
-    if response.status_code == 200:
-        url = "https://ko.wikipedia.org/w/api.php?action=parse&parse&page=" + search_results + "&prop=wikitext&formatversion=2&format=json"
-        response = requests.get(url, headers=headers)
-    return response.json(), wiki_url
+    try:
+        response = requests.get(wiki_url)
+        if response.status_code == 200:
+            url = "https://ko.wikipedia.org/w/api.php?action=parse&parse&page=" + search_results + "&prop=wikitext&formatversion=2&format=json"
+            response = requests.get(url, headers=headers)
+            return response.json(), wiki_url
+    except requests.exceptions.ConnectionError:
+        time.sleep(1)
+        return getWikiData(search_results)
 
-# Tokenization of the synopsis
+# 페이지 내용 전처리 및 토크나이징
 def tokenizing(text):
     text_data, url = getWikiData(text)
     kiwi = Kiwi()
@@ -74,7 +87,7 @@ def tokenizing(text):
     # return result, url, text_data, text_wikitext
     return result, url
 
-# Extracting words and their cosine similarity values
+# 단어 추출 및 빈도수 체크
 def make_word(result):
     cosine_list = []
     made_words = []
@@ -85,11 +98,14 @@ def make_word(result):
     cnt_dict = {}
     cosine = {}
     for form, tag, start, length in result:
-        # Nouns
+        
+        # Nouns (일반명사, 고유명사)
         if tag in ['NNP', 'NNG']:
-            # 명사 여러 개가 띄어쓰기 없이 나왔을 때 한 단어로 취급, 후에 바꿔도 됨(모든 명사 구분하는 걸로)
+
+            # 명사 여러 개가 띄어쓰기 없이 나왔을 때 한 단어로 취급
             if bef_tag == 'NN' and bef_loc == start:
                 temp_word += form
+
             # 띄어쓰기 후에 들어오는 명사
             elif bef_tag == 'NN' and bef_loc != start:
                 if temp_word in cnt_dict:
@@ -98,7 +114,7 @@ def make_word(result):
                     cnt_dict[temp_word] = 1
                 made_words.append(temp_word)
                 temp_word = form
-                form_num = 0
+                form_num = 0 # 밑에서 1 더해서 일단 초기화
                 
             # 관형격 조사 다음에 들어오는 명사
             elif bef_tag == 'JKG' or bef_tag == 'XSN':
@@ -114,17 +130,19 @@ def make_word(result):
 
         # 관형격 조사일 때 ex)신의성실의 원칙
         elif tag == 'JKG' and bef_tag == "NN":
-            cosine_list.append(form)
+            cosine_list.append(temp_word)
             temp_word += form + " "
             bef_tag = 'JKG'
             form_num += 1
 
-        # ~적 (e.g., 안정적, 감각적)
+        # ~적 ex)안정적 공급
         elif tag == 'XSN' and bef_tag == "NN":
+            cosine_list.append(temp_word)
             temp_word += form + " "
             bef_tag = 'XSN'
             form_num += 1
         
+        # 그 외의 태그 등장시 만들어진 단어 append
         else:
             if bef_tag == 'NN' and len(temp_word) > 1:
                 if temp_word in cnt_dict:
@@ -140,7 +158,6 @@ def make_word(result):
                 #             cosine[temp_word] = cosine_sum
 
             cosine_list = []
-            cosine_sum = 0
             temp_word = ""
             bef_tag = ""
             bef_loc = 0
@@ -152,32 +169,35 @@ def make_word(result):
 def getWord(text):
     search_results = get_search_results(text)
     similar_word= []
-    result ={}
     grouped_result = []
     word_group = {}
     cnt = 0
     for search in search_results:
         content, url = tokenizing(search)
         cosine, made_words,cnt_dict = make_word(content)
-        made_words_set = set(made_words)
-        final_words_list = list(made_words_set)
-        final_words_list = [token for token in final_words_list if "'" not in token]
+        # 중복 단어 처리 및 전처리
+        made_words_set = set(made_words) 
+        final_words_list = list(made_words_set) 
+        final_words_list = [token for token in final_words_list if "'" not in token] 
         for token in final_words_list:
             # count = 0
             # if token in ko_model.wv.key_to_index:
                 # cosine_sim = cosine_similarity([ko_model.wv[text_data['parse']['title']]], [ko_model.wv[token]])
-                if len(token) >1 and token in cnt_dict:
+                if len(token) > 1 and token in cnt_dict:
                     # print(f'{token}: {cosine_sim}')
-                    similar_word.append([token, cnt_dict[token],url]) 
+                    similar_word.append([token, cnt_dict[token], url]) 
         # for token in cosine:
         #     if len(token) > 1:
         #         # count = text_wikitext.count(token[0])
         #         # print(f'{token}: {cosine[token]}')
         #         similar_word.append([token, cnt_dict[token], url])
         
-        cnt += 1
-        if cnt%16==0:
-            time.sleep(1)
+        # 요청 나눠서 하기
+        # cnt += 1
+        # if cnt%16 == 0:
+        #     time.sleep(1)
+    
+    # 단어마다 페이지별 출현 횟수 및 url list에 넣기
     for word_info in similar_word:
             word, count, url = word_info
             if word not in word_group:
@@ -191,9 +211,9 @@ def getWord(text):
     return grouped_result
 
 if __name__ == '__main__' :
-    result = getWord("한국사")
+    result = getWord("수학")
     print(result)
     import pickle
-    import gzip
+    import gzip 
     with gzip.open('first_crawling', 'wb') as f:
         pickle.dump(result, f)
