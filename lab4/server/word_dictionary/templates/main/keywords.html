@@ -315,6 +315,7 @@
           cancelBtn.addEventListener('click', function() {
             newRow.remove(); // 해당 행을 삭제
             setButtonActionInProgress(false); // 버튼 활성화
+            rowCount()   // 총 키워드 개수 업데이트
           });
 
           // 클릭 이벤트 추가
@@ -400,3 +401,4 @@
 
 </body>
 </html>
+

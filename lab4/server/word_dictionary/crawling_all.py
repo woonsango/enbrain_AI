@@ -156,7 +156,7 @@ def getWord(text):
     grouped_result = []
     word_group = {}
     cnt = 0
-    for search in search_results[:5]:
+    for search in search_results:
         content, url = tokenizing(search)
         cosine, made_words,cnt_dict = make_word(content)
         made_words_set = set(made_words)
