@@ -461,21 +461,29 @@
             // 기존 값 저장
             var word = cells[0].innerText;
             var usage = cells[1].innerText;
-            var url = cells[4].innerText;
+            var urls = cells[4].innerText.split('\n');
 
             // 수정할 내용을 입력창으로 변경
             cells[0].innerHTML = '<button class="icon-button close-row-btn" style="margin-right: 20px;">&times;</button>' +
                                 '<input type="text" style="font-size: x-small" value=" '+ (word !== undefined ? word : '') +' ">';
             cells[1].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (usage !== undefined ? usage : '') +' ">';
-            cells[4].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (url !== undefined ? url : '') +' ">';
+            var inputUrl = []   // 수정할 때 원본 url이 보이도록
+            for (var i = 0; i < urls.length; i++) {
+              inputUrl.push("https://ko.wikipedia.org/wiki/" + urls[i]);
+              }
+            cells[4].innerHTML = '<input type="text" style="font-size: x-small" value=" '+ (inputUrl !== undefined ? inputUrl.join(', ') : '') +' ">';
 
-            // 취소 버튼 클릭 이벤트 추가                                  ->> 수정하기!!!
+            // 취소 버튼 클릭 이벤트 추가
             var cancelBtn = cells[0].querySelector('.close-row-btn');
             cancelBtn.addEventListener('click', function() {
               // 입력창을 기존값으로 변경
               cells[0].innerHTML = word;
               cells[1].innerHTML = usage;
-              cells[4].innerHTML = url;
+              var hrefUrl = [];   // 하이퍼링크 형태로 넣기 위한 리스트
+              for (var i = 0; i < urls.length; i++) {
+                hrefUrl.push('<a href="https://ko.wikipedia.org/wiki/' + urls[i] + '" target="_blank">' + urls[i] + '</a>');
+              }
+              cells[4].innerHTML = hrefUrl.join('<br>');
               console.log(cells);
               modifyMoveBtn.disabled = false;
               setButtonActionInProgress(false); // 버튼 활성화
@@ -535,7 +543,7 @@
         cells[4].innerHTML = finalUrl;
 
         // word와 usage가 변경될 때만 modifyDate 값을 변경
-        if (word !== finalWord || usage !== finalUsage || url !== finalUrl) {
+        if (word !== finalWord || usage !== finalUsage || urls !== finalUrl) {
           cells[3].innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
         }
 
