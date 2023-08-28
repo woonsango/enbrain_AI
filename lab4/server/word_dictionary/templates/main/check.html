@@ -175,6 +175,7 @@
                 <a href={{url}} target="_blank">{{url|slice:"30:"}}</a><br>
                 {% endfor %}
               </td>
+              <!-- <td>{{row.6}}</td> -->
               <td>{{row.5}}</td>
               <td><button class="move-button" onclick="moveHistory(this.parentNode.parentNode)">이동</button></td>
             </tr>
@@ -190,11 +191,13 @@
       function moveHistory(word) {
         // history.html에 데이터 넘겨주기 위해 세션 스토리지에 데이터 저장
         const tdWord = word.querySelector('td:first-child').textContent;
+        var keyword = document.querySelector("#select-word").textContent ;
         console.log(tdWord);
+        console.log(keyword) ;
         sessionStorage.setItem("word", tdWord);
 
         const open = window.open("about:blank")
-        open.location.href = "/history?keyword=" + saveKeyword + "&word=" + tdWord ;
+        open.location.href = "/history?keyword=" + keyword + "&word=" + tdWord ;
       }
 
 
@@ -257,9 +260,10 @@
         var frequencyStart = document.getElementById('frequency-start').value;   // 빈도수 시작 범위
         var frequencyEnd = document.getElementById('frequency-end').value;   // 빈도수 끝 범위
 
-        console.log(saveKeyword)
+        var keyword = document.querySelector("#select-word").textContent ;
+        console.log(keyword) ;
 
-        sendPost('/check', {'mode': 'filter', 'query':saveKeyword, 'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd, 'frequencyStart': frequencyStart, 'frequencyEnd': frequencyEnd})
+        sendPost('/check', {'mode': 'filter', 'query':keyword, 'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd, 'frequencyStart': frequencyStart, 'frequencyEnd': frequencyEnd})
       });
 
 
@@ -283,7 +287,7 @@
   // 키워드 수집 관련 함수
       // URL 파라미터에서 검색어 값 가져오기
       const urlParams = new URLSearchParams(window.location.search);
-      const saveKeyword = urlParams.get('query');
+      var saveKeyword = urlParams.get('query');
   
       // 검색어 값이 있을 경우, 키워드 부분에 넣기
       if (saveKeyword) {
@@ -433,7 +437,8 @@
           console.log(finalUrl) ;
           console.log(finalFrequency) ;
           console.log(saveKeyword) ;
-          sendPost('/check', {'mode': 'add', 'query':saveKeyword, 'finalWord':finalWord, 'finalUsage': finalUsage, 'finalUrl':finalUrl, "finalFrequency": finalFrequency}) ;
+          var keyword = document.querySelector("#select-word").textContent ;
+          sendPost('/check', {'mode': 'add', 'query':keyword.trim(), 'finalWord':finalWord.trim(), 'finalUsage': finalUsage, 'finalUrl':finalUrl.trim(), "finalFrequency": finalFrequency.trim()}) ;
         }
       }
 
@@ -537,10 +542,11 @@
           modifyMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
           setButtonActionInProgress(false); // 버튼 활성화
 
-          console.log(finalWord) ;
-          console.log(finalUsage) ;
-          console.log(finalUrl) ;
-          sendPost('/check', {'mode': 'update', 'query': saveKeyword, 'beforeWord': word, 'finalWord': finalWord, 'finalUsage': finalUsage, 'finalUrl': finalUrl})
+          console.log(finalWord.trim()) ;
+          console.log(finalUsage.trim()) ;
+          console.log(finalUrl.trim()) ;
+          var keyword = document.querySelector("#select-word").textContent;
+          sendPost('/check', {'mode': 'update', 'query': keyword.trim(), 'beforeWord': word.trim(), 'finalWord': finalWord.trim(), 'finalUsage': finalUsage.trim(), 'finalUrl': finalUrl.trim()})
         }
       }
 

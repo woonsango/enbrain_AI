@@ -174,7 +174,7 @@ def getWord(text):
     grouped_result = []
     word_group = {}
     cnt = 0
-    for search in search_results:
+    for search in search_results[:500]:
         content, url = tokenizing(search)
         cosine, made_words,cnt_dict = make_word(content)
         # 중복 단어 처리 및 전처리

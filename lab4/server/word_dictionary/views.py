@@ -59,7 +59,9 @@ def check(request):
                     # 여기 부분 키워드에만 나오도록 수정하자
                     cursor.execute(f"""select id
                             from keyword_dictionary
-                            where word = '{request.POST['finalWord']}' ;""")
+                            where word = '{request.POST['finalWord']}' and keyword_id = (select id
+                                                     										from keyword
+                                                     										where keyword = '{request.POST['query']}');""")
                     keyword_dictionary_id = (cursor.fetchone())[0]
                     cursor.execute(f"""insert into dictionary_crawling_info (keyword_dictionary_id, frequency, url, created_date, modified_date)
                                     values ({keyword_dictionary_id}, {request.POST['finalFrequency']}, '입력한 단어', NOW(), NOW()) ;""")
@@ -71,17 +73,19 @@ def check(request):
             with connection.cursor() as cursor:
                 cursor.execute(f"""update keyword_dictionary
                                     set word = '{request.POST['finalWord']}', usable = {request.POST['finalUsage']}, modified_date = now()
-                                    where keyword_id = (select id
-                                                            from keyword
-                                                            where keyword = '{request.POST['query']}')
-                                                and id = (select tmp.id
-                                                        from(select id 
-                                                                from keyword_dictionary
-                                                                where word = '{request.POST['beforeWord']}') tmp);""")
+                                    where id = (select tmp.id
+			                                    from (select id 
+                                                        from keyword_dictionary
+                                                        where word = '{request.POST['beforeWord']}' and keyword_id = (select id
+                                                                                            from keyword
+                                                                                            where keyword = '{request.POST['query']}')) tmp);""")
+                print('update success')
                 cursor.execute(f"""insert into dictionary_history (keyword_dictionary_id, word, created_date, modified_date)
                                 values ((select id
                                         from keyword_dictionary
-                                        where word = '{request.POST['finalWord']}'), 
+                                        where word = '{request.POST['finalWord']}'and keyword_id = (select id
+                                                                                    from keyword
+                                                                                    where keyword = '{request.POST['query']}')), 
                                         '{request.POST['finalWord']}', now(), now()) ;""")
 
         
@@ -92,49 +96,42 @@ def check(request):
     #db 불러오기
     with connection.cursor() as cursor:
         # query문 실행(keyword table 가져오기)
-        cursor.execute(f"""with tmp as
-                        (
-                        select keyword_dictionary_id, sum(frequency) as frequency
-                        from dictionary_crawling_info
-                        group by keyword_dictionary_id
-                        )
-                        -- where keyword_dictionary_id = 42 ;
-                        SELECT d.id, d.word, d.usable, cast(cast(d.created_date as date) as char), cast(cast(d.modified_date as date) as char), tmp.frequency
-                        FROM mydb.keyword_dictionary d
-                        join mydb.keyword k on d.keyword_id = k.id
-                        join tmp on d.id = tmp.keyword_dictionary_id
-                        where k.keyword = '{word}'
-                        order by 6 desc ;""")
+        cursor.execute(f"""with url_info as 
+                            (
+                                select d.id , c.url, frequency
+                                from (select *, row_number() over (partition by keyword_dictionary_id order by frequency desc, id) as fre_num
+                                        from dictionary_crawling_info) c
+                                join keyword_dictionary d on c.keyword_dictionary_id = d.id
+                                where d.keyword_id = (select id
+                                            from keyword
+                                            where keyword = '{word}') and fre_num <= 3
+                                order by d.id, frequency desc
+                            ), 
+                            freq_info as
+                            (
+                                select keyword_dictionary_id, sum(frequency) as frequency
+                                from dictionary_crawling_info
+                                group by keyword_dictionary_id
+                            )
+                            -- where keyword_dictionary_id = 42 ;
+                            SELECT d.id, d.word, d.usable, cast(cast(d.created_date as date) as char), cast(cast(d.modified_date as date) as char), freq_info.frequency, TRIM(TRAILING ', ' FROM group_concat(url_info.url, ', ')) as url
+                            FROM mydb.keyword_dictionary d
+                            join mydb.keyword k on d.keyword_id = k.id
+                            join freq_info on d.id = freq_info.keyword_dictionary_id
+                            join url_info on d.id = url_info.id
+                            where k.keyword = '{word}'
+                            group by d.id
+                            order by 6 desc ;""")
         
         # query문 결과 모두를 tuple로 저장
         rows = cursor.fetchall()
-
-    # print(word)
-    # print(rows)
-    rows_list = []
-    with connection.cursor() as cursor:
-        for word1 in rows:
-            # print(list(word))
-            cursor.execute(f"""select url
-                            from dictionary_crawling_info
-                            where keyword_dictionary_id = (select id
-                                                            from keyword_dictionary
-                                                            where word = '{word1[1]}' and keyword_id = (select id
-                                                            from keyword
-                                                            where keyword = '{word}'))
-                            order by frequency desc
-                            limit 3 ;""")
-            urls = [url[0] for url in cursor.fetchall()]
-            tmp = list(word1)
-            tmp.append(urls)
-            rows_list.append(tmp)
-        print(rows_list)
+        rows = [ (i[0], i[1], i[2], i[3], i[4], i[5], i[6].split(',')) for i in rows]
         
 
-    # print(rows)
+    print(rows)
 
 
-    return render(request, 'main/check.html', {'rows': rows_list, 'keyword':word})
+    return render(request, 'main/check.html', {'rows': rows, 'keyword':word})
 
 def history(request):
 
@@ -147,7 +144,9 @@ def history(request):
                             from dictionary_history
                             where keyword_dictionary_id = (select id 
                                                             from keyword_dictionary
-                                                            where word = '{word}')
+                                                            where word = '{word}' and keyword_id = (select id
+                                                                                                    from keyword
+                                                                                                    where keyword = '{keyword}'))
                             order by created_date desc;""")
         rows = cursor.fetchall()
         print(rows)
@@ -190,7 +189,7 @@ def keywordCollection(request):
                 # keyword에 대한 단어 가져오도록 변경
                 cursor.execute(f"""select id
                             from keyword_dictionary
-                            where word = '{word[0]}' ;""")
+                            where word = '{word[0]}' and keyword_id = {keyword_id});""")
                 keyword_dictionary_id = (cursor.fetchone())[0]
                 print(word)
                 for url_frequency in range(len(word[1])):
