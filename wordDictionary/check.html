@@ -458,6 +458,10 @@
             var selectedRow = selectedRows[0]; // 첫 번째 선택된 행만 사용하도록
             var cells = selectedRow.cells;
 
+            // 용어단어집 이동 버튼 비활성화
+            modifyMoveBtn = selectedRow.querySelector('.move-button');
+            modifyMoveBtn.disabled = true;
+
             // 기존 값 저장
             var word = cells[0].innerText;
             var usage = cells[1].innerText;
@@ -484,14 +488,10 @@
                 hrefUrl.push('<a href="https://ko.wikipedia.org/wiki/' + urls[i] + '" target="_blank">' + urls[i] + '</a>');
               }
               cells[4].innerHTML = hrefUrl.join('<br>');
-              console.log(cells);
-              modifyMoveBtn.disabled = false;
+
+              modifyMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
               setButtonActionInProgress(false); // 버튼 활성화
             });
-
-            // 용어단어집 이동 버튼 비활성화
-            modifyMoveBtn = table.querySelector('.move-button');
-            modifyMoveBtn.disabled = true;
 
             // 입력창에서 엔터 누르면 저장 함수로 이동
             cells[0].getElementsByTagName('input')[0].addEventListener('keydown', function(event) {
