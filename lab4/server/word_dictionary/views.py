@@ -216,7 +216,7 @@ def keywords(request):
             with connection.cursor() as cursor:
                 cursor.execute(f"""select keyword, cast(cast(created_date as date) as char), cast(cast(modified_date as date) as char)
                                 from keyword
-                                where ((created_date >= '{request.POST['addDateStart']}') and (created_date <= '{request.POST['addDateEnd']}')) and ((modified_date >= '{request.POST['modifyDateStart']}') and (modified_date <= '{request.POST['modifyDateEnd']}'));""")
+                                where remove = 1 and ((created_date >= '{request.POST['addDateStart']}') and (created_date <= '{request.POST['addDateEnd']}')) and ((modified_date >= '{request.POST['modifyDateStart']}') and (modified_date <= '{request.POST['modifyDateEnd']}'));""")
                 rows = cursor.fetchall()
                 print(rows)
                 return render(request, 'main/keywords.html', {"words":rows})
@@ -236,27 +236,19 @@ def keywords(request):
         elif request.POST['mode'] == 'delete':
             print(request.POST)
             with connection.cursor() as cursor:
-                for word in request.POST['delete_word'].split(','):
-                    print(word)
-                    cursor.execute(f"""select k.id
-                                    from keyword_dictionary dict
-                                    join keyword k on dict.keyword_id = k.id
-                                    where k.keyword = '{word}' ;""")
-                    count = len(cursor.fetchall())
-                    print(count)
-                    if count > 0:
-                        print('삭제할 수 없음')
-                    else:
-                        cursor.execute(f"""DELETE FROM keyword
-                                        WHERE keyword = '{word}' ;""")
-                        print(f'{word} 삭제 성공')
+                for keyword in request.POST['delete_word'].split(','):
+                    print(keyword)
+                    cursor.execute(f"""update keyword
+                                        set remove = 0
+                                        where keyword = '{keyword}' ;""")
                         
 
     #db 불러오기
     with connection.cursor() as cursor:
         # query문 실행(keyword table 가져오기)
         cursor.execute("""SELECT keyword, cast(cast(created_date as date) as char), cast(cast(modified_date as date) as char)
-                        FROM keyword ;""")
+                            FROM keyword
+                            where remove = 1 ;""")
         # query문 결과 모두를 tuple로 저장
         rows = cursor.fetchall()
         # print(rows)
