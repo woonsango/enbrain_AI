@@ -189,7 +189,7 @@ def keywordCollection(request):
                 # keyword에 대한 단어 가져오도록 변경
                 cursor.execute(f"""select id
                             from keyword_dictionary
-                            where word = '{word[0]}' and keyword_id = {keyword_id});""")
+                            where word = '{word[0]}' and keyword_id = {keyword_id};""")
                 keyword_dictionary_id = (cursor.fetchone())[0]
                 print(word)
                 for url_frequency in range(len(word[1])):
