@@ -16,7 +16,7 @@
 <body>
     <div class="container" style="padding-top: 5%;">
         <div class="input-container">
-          <h1 id="select-word">수정 내역</h1>
+          <h1 id="select-word">키워드 '{{keyword}}'의 단어 '{{word}}' 수정 내역</h1>
         </div>
       </div>
 
@@ -51,11 +51,11 @@
 
       <script>
         // keyword.html에서 저장했던 세션 스토리지에서 데이터 불러오기
-        const saveKeyword = sessionStorage.getItem("keyword");
-        const saveWord = sessionStorage.getItem("word")
+        // const saveKeyword = sessionStorage.getItem("keyword");
+        // const saveWord = sessionStorage.getItem("word") ;
 
         // 값이 있을 경우, 키워드와 단어 부분에 넣기
-        document.getElementById("select-word").textContent = "키워드 '" + (saveKeyword ? saveKeyword : '') + "'의 단어 '" + (saveWord ? saveWord : '') + "' 수정 내역";
+        // document.getElementById("select-word").textContent = "키워드 '" + (saveKeyword ? saveKeyword : '') + "'의 단어 '" + (saveWord ? saveWord : '') + "' 수정 내역";
       </script>
 </body>
 </html>

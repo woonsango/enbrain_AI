@@ -152,7 +152,7 @@ def history(request):
         print(rows)
             
 
-    return render(request, 'main/history.html', {'rows': rows})
+    return render(request, 'main/history.html', {'rows': rows, 'keyword': keyword, 'word':word})
 
 def keywordCollection(request):
     print(request.GET.get('query'))
