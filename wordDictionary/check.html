@@ -87,6 +87,7 @@
         <button class="icon-button"><img src="{% static 'images/btn_imgs/add.png' %}" alt="추가" width="17px" onclick="add_table()"></button>
         <button class="icon-button"><img src="{% static 'images/btn_imgs/modify.png' %}" alt="수정" width="17px" onclick="modify_table()"></button>
         <button class="icon-button" id="add-btn"><img src="{% static 'images/btn_imgs/delete.png' %}" alt="삭제" width="17px" onclick="deleteRows()"></button>
+        <button class="icon-button"><img src="{% static 'images/btn_imgs/del_history3.png' %}" alt="삭제 내역" width="17px" onclick="historyOfDelete()"></button>
       </div>
   </div>
 
@@ -591,6 +592,20 @@
 
           setButtonActionInProgress(false); // 버튼 활성화
         }
+      }
+
+
+
+
+    // 5. 삭제 내역창 이동 함수
+      function historyOfDelete() {    
+        if (saveKeyword) {
+          sessionStorage.setItem("keyword", saveKeyword)
+        }
+
+        // 페이지 이동
+        const open = window.open("about:blank")
+        open.location.href = "/delWord"
       }
     </script>
 </body>

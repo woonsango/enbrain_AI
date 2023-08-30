@@ -30,7 +30,9 @@
             <tr>
               <th>단어</th>
               <th>삭제일자</th>
-              <th>복구</th>
+              <th>URL</th>
+              <th>빈도수</th>
+              <th>단어 복구</th>
             </tr>
           </thead>
   
@@ -39,6 +41,8 @@
               <tr onclick="javascript:select_table(this);">
                 <td>단어</td>
                 <td>삭제일자</td>
+                <td>URL</td>
+                <td>빈도수</td>
                 <td><button id="restore-btn" class="restore-button" onclick="restore(this.parentNode.parentNode)">복구</button></td>
               </tr>
               {% endfor %}
@@ -49,17 +53,17 @@
 
 
       <script>
-        // keyword.html에서 저장했던 세션 스토리지에서 데이터 불러와서 넣기
+        // check.html에서 저장했던 세션 스토리지에서 데이터 불러와서 넣기
         const saveKeyword = sessionStorage.getItem("keyword");
         document.getElementById("select-word").textContent = "키워드 '" + (saveKeyword ? saveKeyword : '') + "'의 단어 삭제 내역";
 
 
     // 페이지 이동
-        function restore(keyword) {
+        function restore(word) {
             const confirmRestore = confirm("이 단어를 복구하시겠습니까?");   // 복구 확인 메세지
             
             if (confirmRestore) {
-                keyword.remove();
+                word.remove();
 
                 // 단어 삭제값 변경하기
 
