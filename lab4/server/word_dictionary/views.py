@@ -215,8 +215,12 @@ def keywords(request):
             print(request.POST['modifyDateEnd'])
             with connection.cursor() as cursor:
                 cursor.execute(f"""select keyword, cast(cast(created_date as date) as char), cast(cast(modified_date as date) as char)
-                                from keyword
-                                where remove = 1 and ((created_date >= '{request.POST['addDateStart']}') and (created_date <= '{request.POST['addDateEnd']}')) and ((modified_date >= '{request.POST['modifyDateStart']}') and (modified_date <= '{request.POST['modifyDateEnd']}'));""")
+                                    from keyword
+                                    where remove = 1 and 
+                                        ((created_date >= case '{request.POST['addDateStart']}' when '' then '2003-04-01' else '{request.POST['addDateStart']}' end) and 
+                                        (created_date <= case '{request.POST['addDateEnd']}' when '' then now() else '{request.POST['addDateEnd']}' end)) and 
+                                        ((modified_date >= case '{request.POST['modifyDateStart']}' when '' then '2003-04-01' else '{request.POST['modifyDateStart']}' end) and 
+                                        (modified_date <= case '{request.POST['modifyDateEnd']}' when '' then now() else '{request.POST['modifyDateEnd']}' end));""")
                 rows = cursor.fetchall()
                 print(rows)
                 return render(request, 'main/keywords.html', {"words":rows})
