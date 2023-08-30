@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deleted keywords</title>
+
+    <style>
+        .container {display: flex; flex-direction: column; align-items: center; font-size: x-small;}
+    
+        table {width: 90%; border-top: 1px solid #444444; border-collapse: collapse; text-align: center;}
+        th, td {border-bottom: 1px solid #444444; padding: 20px; text-align: center;}
+
+        .restore-button {border: none; border-radius: 10px; min-height: 25px; min-width: 40px; font-size: x-small;}
+
+    </style>
+
+</head>
+<body>
+    <div class="container" style="padding-top: 5%;">
+        <div class="input-container">
+          <h1 id="select-word">키워드 삭제 내역</h1>
+        </div>
+      </div>
+
+      <!-- 테이블 -->
+      <div class="container" style="padding-top: 5%;">
+        <table id="table" border="0">
+          <thead>
+            <tr>
+              <th>키워드</th>
+              <th>삭제일자</th>
+              <th>복구</th>
+            </tr>
+          </thead>
+  
+          <tbody>
+            {% for row in rows %}
+              <tr onclick="javascript:select_table(this);">
+                <td>키워드</td>
+                <td>삭제일자</td>
+                <td><button id="restore-btn" class="restore-button" onclick="restore(this.parentNode.parentNode)">복구</button></td>
+              </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+
+
+      <script>
+    // 페이지 이동
+        function restore(keyword) {
+            const confirmRestore = confirm("이 키워드를 복구하시겠습니까?");
+            
+            if (confirmRestore) {
+                keyword.remove();
+
+                // 키워드 삭제값 변경하기
+
+                alert("복구 완료되었습니다.");
+            } else {
+                alert("복구가 취소되었습니다.");
+                }
+            }
+        </script>
+</body>
+</html>
