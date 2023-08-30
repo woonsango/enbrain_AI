@@ -22,23 +22,41 @@ def check(request):
             print(request.POST['frequencyEnd'])
 
             with connection.cursor() as cursor:
-                cursor.execute(f"""with tmp as
-                                    (
-                                    select keyword_dictionary_id, sum(frequency) as frequency
-                                    from dictionary_crawling_info
-                                    group by keyword_dictionary_id
-                                    )
-                                    -- where keyword_dictionary_id = 42 ;
-                                    SELECT d.id, d.word, d.usable, cast(cast(d.created_date as date) as char), cast(cast(d.modified_date as date) as char), tmp.frequency
-                                    FROM mydb.keyword_dictionary d
-                                    join mydb.keyword k on d.keyword_id = k.id
-                                    join tmp on d.id = tmp.keyword_dictionary_id
-                                    where k.keyword = '{request.POST['query']}' and 
-                                    (((d.created_date >= '{request.POST['addDateStart']}') and (d.created_date <= '{request.POST['addDateEnd']}')) and 
-                                    ((d.modified_date >= '{request.POST['modifyDateStart']}') and (d.modified_date <= '{request.POST['modifyDateEnd']}'))) and 
-                                    (tmp.frequency >= {request.POST['frequencyStart']} and tmp.frequency <= {request.POST['frequencyEnd']})
-                                    order by 6 desc ;""")
+                cursor.execute(f"""with url_info as 
+                            (
+                                select d.id , c.url, frequency
+                                from (select *, row_number() over (partition by keyword_dictionary_id order by frequency desc, id) as fre_num
+                                        from dictionary_crawling_info) c
+                                join keyword_dictionary d on c.keyword_dictionary_id = d.id
+                                where d.keyword_id = (select id
+                                            from keyword
+                                            where keyword = '{request.POST['query']}') and fre_num <= 3
+                                order by d.id, frequency desc
+                            ), 
+                            freq_info as
+                            (
+                                select keyword_dictionary_id, sum(frequency) as frequency
+                                from dictionary_crawling_info
+                                group by keyword_dictionary_id
+                            )
+                            -- where keyword_dictionary_id = 42 ;
+                            SELECT d.id, d.word, d.usable, cast(cast(d.created_date as date) as char), cast(cast(d.modified_date as date) as char), freq_info.frequency, TRIM(TRAILING ', ' FROM group_concat(url_info.url, ', ')) as url
+                            FROM mydb.keyword_dictionary d
+                            join mydb.keyword k on d.keyword_id = k.id
+                            join freq_info on d.id = freq_info.keyword_dictionary_id
+                            join url_info on d.id = url_info.id
+                            where d.remove = 1 and
+                                    k.keyword = '{request.POST['query']}' and 
+                                    ((d.created_date >= case '{request.POST['addDateStart']}' when '' then '2003-04-01' else '{request.POST['addDateStart']}' end) and 
+                                    (d.created_date <= case '{request.POST['addDateEnd']}' when '' then now() else '{request.POST['addDateEnd']}' end)) and 
+                                    ((d.modified_date >= case '{request.POST['modifyDateStart']}' when '' then '2003-04-01' else '{request.POST['modifyDateStart']}' end) and 
+                                    (d.modified_date <= case '{request.POST['modifyDateEnd']}' when '' then now() else '{request.POST['modifyDateEnd']}' end)) and 
+                                    (freq_info.frequency >= case '{request.POST['frequencyStart']}' when '' then 0 else cast('{request.POST['frequencyStart']}' as unsigned) end and freq_info.frequency <= case '{request.POST['frequencyEnd']}' when '' then 999999999 else cast('{request.POST['frequencyEnd']}' as unsigned) end)
+                            group by d.id
+                            order by 6 desc ;""")
+                # query문 결과 모두를 tuple로 저장
                 rows = cursor.fetchall()
+                rows = [ (i[0], i[1], i[2], i[3], i[4], i[5], i[6].split(',')) for i in rows]
                 print(rows)
             return render(request, 'main/check.html', {"rows":rows, 'keyword':request.POST['query']})
         elif request.POST['mode'] == 'add':
@@ -49,6 +67,7 @@ def check(request):
                                     where keyword_id = (select id
                                                         from keyword
                                                         where keyword = '{request.POST['query']}') ;""")
+                ## 이미 있는거면 알려주기
                 if request.POST["finalWord"] not in [i[0]for i in cursor.fetchall()]:
                     print(request.POST["finalWord"])
                     cursor.execute(f"""insert into keyword_dictionary (keyword_id, word, created_date, modified_date)
@@ -119,7 +138,7 @@ def check(request):
                             join mydb.keyword k on d.keyword_id = k.id
                             join freq_info on d.id = freq_info.keyword_dictionary_id
                             join url_info on d.id = url_info.id
-                            where k.keyword = '{word}'
+                            where d.remove = 1 and k.keyword = '{word}'
                             group by d.id
                             order by 6 desc ;""")
         
@@ -191,7 +210,7 @@ def keywordCollection(request):
                             from keyword_dictionary
                             where word = '{word[0]}' and keyword_id = {keyword_id};""")
                 keyword_dictionary_id = (cursor.fetchone())[0]
-                print(word)
+                # print(word)
                 for url_frequency in range(len(word[1])):
                     # print(word[1][url_frequency])
                     # print(word[2][url_frequency])
