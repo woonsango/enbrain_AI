@@ -106,6 +106,20 @@ def check(request):
                                                                                     from keyword
                                                                                     where keyword = '{request.POST['query']}')), 
                                         '{request.POST['finalWord']}', now(), now()) ;""")
+        elif request.POST['mode'] == 'delete' :
+            print(request.POST)
+            with connection.cursor() as cursor:
+                keyword = request.POST['query']
+                for word in request.POST['delete_word'].split(','):
+                    print(word)
+                    cursor.execute(f"""update keyword_dictionary
+                                        set remove = 0
+                                        where id = (select tmp.id
+                                                    from (select id
+                                                            from keyword_dictionary
+                                                            where word = '{word}' and keyword_id = (select id
+                                                                                                from keyword
+                                                                                                where keyword = '{keyword}')) as tmp);""")
 
         
         word = request.POST['query']

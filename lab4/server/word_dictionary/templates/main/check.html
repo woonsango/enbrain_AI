@@ -575,6 +575,8 @@
               delete_word[i] = row.querySelector('td').innerHTML
             }
             console.log(delete_word) ;
+            var keyword = document.querySelector("#select-word").textContent ;
+            sendPost('/check', {'mode': 'delete', 'query':keyword, 'delete_word': [delete_word]}) ;
 
             selectedRows = [];
 
