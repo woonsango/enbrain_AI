@@ -95,7 +95,16 @@ def check(request):
         elif request.POST['mode'] == 'update':
             print(request.POST)
             with connection.cursor() as cursor:
-                cursor.execute(f"""update keyword_dictionary
+                cursor.execute(f"""select word
+                                    from keyword_dictionary
+                                    where keyword_id = (select id
+                                                        from keyword
+                                                        where keyword = '민법') ;""")
+                result = [i[0] for i in cursor.fetchall()]
+                if request.POST['finalWord'] in result:
+                    print('이미 존재하는 단어입니다')
+                else: 
+                    cursor.execute(f"""update keyword_dictionary
                                     set word = '{request.POST['finalWord']}', usable = {request.POST['finalUsage']}, modified_date = now()
                                     where id = (select tmp.id
 			                                    from (select id 
@@ -103,14 +112,14 @@ def check(request):
                                                         where word = '{request.POST['beforeWord']}' and keyword_id = (select id
                                                                                             from keyword
                                                                                             where keyword = '{request.POST['query']}')) tmp);""")
-                print('update success')
-                cursor.execute(f"""insert into dictionary_history (keyword_dictionary_id, word, created_date, modified_date)
-                                values ((select id
-                                        from keyword_dictionary
-                                        where word = '{request.POST['finalWord']}'and keyword_id = (select id
-                                                                                    from keyword
-                                                                                    where keyword = '{request.POST['query']}')), 
-                                        '{request.POST['finalWord']}', now(), now()) ;""")
+                    print('update success')
+                    cursor.execute(f"""insert into dictionary_history (keyword_dictionary_id, word, created_date, modified_date)
+                                    values ((select id
+                                            from keyword_dictionary
+                                            where word = '{request.POST['finalWord']}'and keyword_id = (select id
+                                                                                        from keyword
+                                                                                        where keyword = '{request.POST['query']}')), 
+                                            '{request.POST['finalWord']}', now(), now()) ;""")
         elif request.POST['mode'] == 'delete' :
             print(request.POST)
             with connection.cursor() as cursor:
