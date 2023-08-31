@@ -6,10 +6,12 @@ import time
 import re
 import requests.exceptions
 
-# ref 태그 사이 내용 삭제
-def remove_ref_tags(text):
-    pattern = r'<ref>.*?</ref>'
+# 텍스트 전처리 
+def remove_texts(text):
+    pattern = r'<ref>.*?</ref>|\{\{.*?\}\}|\[\[분류:.*?\]\]'
     cleaned_text = re.sub(pattern, '', text, flags=re.DOTALL)
+    pattern = r'== 외부 링크 ==|== 분류 ==|== 참고 문헌 ==|== 같이 보기 ==|== 참고 자료 =='
+    cleaned_text = re.sub(pattern, '', cleaned_text, flags=re.DOTALL)
     return cleaned_text
 
 # 검색결과 나오는 소제목들 크롤링
@@ -80,7 +82,7 @@ def tokenizing(text):
     text_data, url = getWikiData(text)
     kiwi = Kiwi()
     kiwi.prepare()
-    text_data['parse']['wikitext'] = remove_ref_tags(text_data['parse']['wikitext'])
+    text_data['parse']['wikitext'] = remove_texts(text_data['parse']['wikitext'])
     index = text_data['parse']['wikitext'].find("== 각주 ==")
     if(index != -1):
           text_data['parse']['wikitext'] = text_data['parse']['wikitext'][:index]
@@ -213,9 +215,9 @@ def getWord(text):
     return grouped_result
 
 if __name__ == '__main__' :
-    result = getWord("수학")
+    result = getWord("한국사")
     print(result)
-    import pickle
-    import gzip 
-    with gzip.open('first_crawling', 'wb') as f:
-        pickle.dump(result, f)
+    # import pickle
+    # import gzip 
+    # with gzip.open('first_crawling', 'wb') as f:
+    #     pickle.dump(result, f)
