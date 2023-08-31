@@ -584,6 +584,8 @@
               delete_word[i] = row.querySelector('td').innerHTML
             }
             console.log(delete_word) ;
+            var keyword = document.querySelector("#select-word").textContent ;
+            sendPost('/check', {'mode': 'delete', 'query':keyword, 'delete_word': [delete_word]}) ;
 
             selectedRows = [];
 
@@ -599,13 +601,15 @@
 
     // 5. 삭제 내역창 이동 함수
       function historyOfDelete() {    
-        if (saveKeyword) {
-          sessionStorage.setItem("keyword", saveKeyword)
-        }
+        // if (saveKeyword) {
+        //   sessionStorage.setItem("keyword", saveKeyword)
+        // }
+        var keyword = document.querySelector("#select-word").textContent ;
+
 
         // 페이지 이동
         const open = window.open("about:blank")
-        open.location.href = "/delWord"
+        open.location.href = "/delWord?keyword=" + keyword ;
       }
     </script>
 </body>

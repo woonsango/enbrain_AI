@@ -113,7 +113,7 @@ def check(request):
                 for word in request.POST['delete_word'].split(','):
                     print(word)
                     cursor.execute(f"""update keyword_dictionary
-                                        set remove = 0
+                                        set remove = 0, modified_date = now()
                                         where id = (select tmp.id
                                                     from (select id
                                                             from keyword_dictionary
@@ -161,7 +161,7 @@ def check(request):
         rows = [ (i[0], i[1], i[2], i[3], i[4], i[5], i[6].split(',')) for i in rows]
         
 
-    print(rows)
+    # print(rows)
 
 
     return render(request, 'main/check.html', {'rows': rows, 'keyword':word})
@@ -276,7 +276,7 @@ def keywords(request):
                 for keyword in request.POST['delete_word'].split(','):
                     print(keyword)
                     cursor.execute(f"""update keyword
-                                        set remove = 0
+                                        set remove = 0, modified_date = now()
                                         where keyword = '{keyword}' ;""")
                         
 
@@ -294,7 +294,69 @@ def keywords(request):
 
 
 def delWord(request):
-    return render(request, 'main/delWord.html')
+
+    if request.method == 'POST':
+        keyword = request.POST['keyword']
+        re_word = request.POST['re_word']
+        print(keyword)
+        print(re_word)
+        with connection.cursor() as cursor:
+            cursor.execute(f"""update keyword_dictionary
+                                set remove = 1, modified_date = now()
+                                where id = (select tmp.id
+                                            from (select id
+                                                    from keyword_dictionary
+                                                    where word = '{re_word}' and keyword_id = (select id
+                                                                                        from keyword
+                                                                                        where keyword = '{keyword}')) as tmp);""")
+    else:
+        keyword = request.GET.get('keyword')
+    with connection.cursor() as cursor:
+        cursor.execute(f"""with url_info as 
+                            (
+                                select d.id , c.url, frequency
+                                from (select *, row_number() over (partition by keyword_dictionary_id order by frequency desc, id) as fre_num
+                                        from dictionary_crawling_info) c
+                                join keyword_dictionary d on c.keyword_dictionary_id = d.id
+                                where d.keyword_id = (select id
+                                            from keyword
+                                            where keyword = '{keyword}') and fre_num <= 3
+                                order by d.id, frequency desc
+                            ), 
+                            freq_info as
+                            (
+                                select keyword_dictionary_id, sum(frequency) as frequency
+                                from dictionary_crawling_info
+                                group by keyword_dictionary_id
+                            )
+                            -- where keyword_dictionary_id = 42 ;
+                            SELECT d.id, d.word, d.usable, cast(cast(d.modified_date as date) as char), freq_info.frequency, TRIM(TRAILING ', ' FROM group_concat(url_info.url, ', ')) as url
+                            FROM mydb.keyword_dictionary d
+                            join mydb.keyword k on d.keyword_id = k.id
+                            join freq_info on d.id = freq_info.keyword_dictionary_id
+                            join url_info on d.id = url_info.id
+                            where d.remove = 0 and k.keyword = '{keyword}'
+                            group by d.id
+                            order by 5 desc ;""")
+        # query문 결과 모두를 tuple로 저장
+        rows = cursor.fetchall()
+        rows = [ (i[0], i[1], i[2], i[3], i[4], i[5].split(',')) for i in rows]
+
+        
+    return render(request, 'main/delWord.html', {'rows': rows, 'keyword':keyword})
 
 def delKeyword(request):
-    return render(request, 'main/delKeyword.html')
+
+    if request.method == 'POST':
+        re_keyword = request.POST['re_keyword']
+        with connection.cursor() as cursor:
+            cursor.execute(f"""update keyword
+                                set remove = 1, modified_date = now()
+                                where keyword = '{re_keyword}' ;""")
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT keyword, cast(cast(modified_date as date) as char)
+                            FROM keyword
+                            where remove = 0 ;""")
+        rows = cursor.fetchall()
+    return render(request, 'main/delKeyword.html', {'rows':rows})

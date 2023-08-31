@@ -37,8 +37,8 @@
           <tbody>
             {% for row in rows %}
               <tr onclick="javascript:select_table(this);">
-                <td>키워드</td>
-                <td>삭제일자</td>
+                <td>{{row.0}}</td>
+                <td>{{row.1}}</td>
                 <td><button id="restore-btn" class="restore-button" onclick="restore(this.parentNode.parentNode)">복구</button></td>
               </tr>
               {% endfor %}
@@ -49,16 +49,40 @@
 
 
       <script>
+
+          function sendPost(url, params) {
+                      var form = document.createElement('form');
+                      form.setAttribute('method', 'post');
+                      form.setAttribute('action', url);
+                      form.innerHTML = '{% csrf_token %}'
+                      document.charset = "UTF-8";
+
+                      for (var key in params) {
+                          var hiddenField = document.createElement('input');
+                          hiddenField.setAttribute('type', 'hidden');
+                          hiddenField.setAttribute('name', key);
+                          hiddenField.setAttribute('value', params[key]);
+                          form.appendChild(hiddenField);
+                      }
+
+                      document.body.appendChild(form);
+                      form.submit();
+                  }
+
     // 페이지 이동
         function restore(keyword) {
             const confirmRestore = confirm("이 키워드를 복구하시겠습니까?");
             
             if (confirmRestore) {
+              re_keyword = keyword.querySelector("td").textContent
+              console.log(re_keyword)
+
                 keyword.remove();
 
                 // 키워드 삭제값 변경하기
 
                 alert("복구 완료되었습니다.");
+                sendPost('/delKeyword', {'re_keyword': re_keyword})
             } else {
                 alert("복구가 취소되었습니다.");
                 }
