@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.db import connection
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .crawling_all import getWord
 
 # Create your views here.
@@ -20,6 +21,7 @@ def check(request):
             print(request.POST['modifyDateEnd'])
             print(request.POST['frequencyStart'])
             print(request.POST['frequencyEnd'])
+            print(request.POST['selectedUsage'])
 
             with connection.cursor() as cursor:
                 cursor.execute(f"""with url_info as 
@@ -51,13 +53,16 @@ def check(request):
                                     (d.created_date <= case '{request.POST['addDateEnd']}' when '' then now() else '{request.POST['addDateEnd']}' end)) and 
                                     ((d.modified_date >= case '{request.POST['modifyDateStart']}' when '' then '2003-04-01' else '{request.POST['modifyDateStart']}' end) and 
                                     (d.modified_date <= case '{request.POST['modifyDateEnd']}' when '' then now() else '{request.POST['modifyDateEnd']}' end)) and 
-                                    (freq_info.frequency >= case '{request.POST['frequencyStart']}' when '' then 0 else cast('{request.POST['frequencyStart']}' as unsigned) end and freq_info.frequency <= case '{request.POST['frequencyEnd']}' when '' then 999999999 else cast('{request.POST['frequencyEnd']}' as unsigned) end)
+                                    (freq_info.frequency >= case '{request.POST['frequencyStart']}' when '' then 0 else cast('{request.POST['frequencyStart']}' as unsigned) end and freq_info.frequency <= case '{request.POST['frequencyEnd']}' when '' then 999999999 else cast('{request.POST['frequencyEnd']}' as unsigned) end) and
+                                    d.usable = case '{request.POST['selectedUsage']}' when 'one' then 1
+															when 'zero' then 0
+                                                            when 'entire' then  0 or d.usable = 1 end
                             group by d.id
                             order by 6 desc ;""")
                 # query문 결과 모두를 tuple로 저장
                 rows = cursor.fetchall()
                 rows = [ (i[0], i[1], i[2], i[3], i[4], i[5], i[6].split(',')) for i in rows]
-                print(rows)
+                # print(rows)
             return render(request, 'main/check.html', {"rows":rows, 'keyword':request.POST['query']})
         elif request.POST['mode'] == 'add':
             print(request.POST)
@@ -120,6 +125,14 @@ def check(request):
                                                             where word = '{word}' and keyword_id = (select id
                                                                                                 from keyword
                                                                                                 where keyword = '{keyword}')) as tmp);""")
+                    cursor.execute(f"""insert into dictionary_history (keyword_dictionary_id, word, created_date, modified_date)
+                                        values ((select id
+                                                from keyword_dictionary
+                                                where word = '{word}'and keyword_id = (select id
+                                                                                            from keyword
+                                                                                            where keyword = '{keyword}')), 
+                                                '삭제됨', now(), now()) ;""")
+                    
 
         
         word = request.POST['query']
@@ -159,12 +172,24 @@ def check(request):
         # query문 결과 모두를 tuple로 저장
         rows = cursor.fetchall()
         rows = [ (i[0], i[1], i[2], i[3], i[4], i[5], i[6].split(',')) for i in rows]
-        
+
+        # page = request.GET.get('page')
+
+        # paginator = Paginator(rows, 2)
+
+        # try:
+        #     page_obj = paginator.page(page)
+        # except PageNotAnInteger:
+        #     page = 1
+        #     page_obj = paginator.page(page)
+        # except EmptyPage:
+        #     page = paginator.num_pages # 가장 마지막 페이지
+        #     page_obj = paginator.page(page)
 
     # print(rows)
 
-
     return render(request, 'main/check.html', {'rows': rows, 'keyword':word})
+    # return render(request, 'main/check.html', {'rows': page_obj, 'keyword':word, 'paginator': paginator})
 
 def history(request):
 
@@ -309,6 +334,13 @@ def delWord(request):
                                                     where word = '{re_word}' and keyword_id = (select id
                                                                                         from keyword
                                                                                         where keyword = '{keyword}')) as tmp);""")
+            cursor.execute(f"""insert into dictionary_history (keyword_dictionary_id, word, created_date, modified_date)
+                                            values ((select id
+                                                    from keyword_dictionary
+                                                    where word = '{re_word}'and keyword_id = (select id
+                                                                                                from keyword
+                                                                                                where keyword = '{keyword}')), 
+                                                    '복구됨', now(), now()) ;""")
     else:
         keyword = request.GET.get('keyword')
     with connection.cursor() as cursor:
