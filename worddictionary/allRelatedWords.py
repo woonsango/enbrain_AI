@@ -7,10 +7,12 @@ import re
 import requests.exceptions
 
 # 텍스트 전처리 
-def remove_texts(text):
-    pattern = r'<ref>.*?</ref>|\{\{.*?\}\}|\[\[분류:.*?\]\]'
-    cleaned_text = re.sub(pattern, '', text, flags=re.DOTALL)
-    pattern = r'== 외부 링크 ==|== 분류 ==|== 참고 문헌 ==|== 같이 보기 ==|== 참고 자료 =='
+def remove_section(text):
+    pattern = r'\{\{.*?\|(.*?)\}\}'
+    cleaned_text = re.sub(pattern, r'\1', text)
+    pattern = r'\[\[분류:(.*?)\]\]'
+    cleaned_text = re.sub(pattern, r'\1', cleaned_text)
+    pattern = r'== 외부 링크 ==|== 분류 ==|== 참고 문헌 ==|== 같이 보기 ==|== 참고 자료 ==|<ref>.*?</ref>|\{\{.*?\}\}'
     cleaned_text = re.sub(pattern, '', cleaned_text, flags=re.DOTALL)
     return cleaned_text
 
@@ -82,7 +84,7 @@ def tokenizing(text):
     text_data, url = getWikiData(text)
     kiwi = Kiwi()
     kiwi.prepare()
-    text_data['parse']['wikitext'] = remove_texts(text_data['parse']['wikitext'])
+    text_data['parse']['wikitext'] = remove_section(text_data['parse']['wikitext'])
     index = text_data['parse']['wikitext'].find("== 각주 ==")
     if(index != -1):
           text_data['parse']['wikitext'] = text_data['parse']['wikitext'][:index]
@@ -215,7 +217,7 @@ def getWord(text):
     return grouped_result
 
 if __name__ == '__main__' :
-    result = getWord("한국사")
+    result = getWord("민법")
     print(result)
     # import pickle
     # import gzip 
