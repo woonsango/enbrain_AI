@@ -291,3 +291,10 @@ def keywords(request):
         # print(rows)
 
     return render(request, 'main/keywords.html', {"words":rows})
+
+
+def delWord(request):
+    return render(request, 'main/delWord.html')
+
+def delKeyword(request):
+    return render(request, 'main/delKeyword.html')

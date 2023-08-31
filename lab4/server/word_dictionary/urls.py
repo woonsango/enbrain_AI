@@ -9,4 +9,6 @@ urlpatterns = [
     path('keywords', views.keywords, name='keywords'),
     path('keywordCollection', views.keywordCollection, name='keywordCollection'),
     path('history', views.history, name='history'),
-]
+    path('delWord', views.delWord, name='delWord'),
+    path('delKeyword', views.delKeyword, name='delKeyword')
+    ]
