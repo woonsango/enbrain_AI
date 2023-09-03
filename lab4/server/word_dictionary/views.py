@@ -88,7 +88,7 @@ def check(request):
                                                      										where keyword = '{request.POST['query']}');""")
                     keyword_dictionary_id = (cursor.fetchone())[0]
                     cursor.execute(f"""insert into dictionary_crawling_info (keyword_dictionary_id, frequency, url, created_date, modified_date)
-                                    values ({keyword_dictionary_id}, {request.POST['finalFrequency']}, '입력한 단어', NOW(), NOW()) ;""")
+                                    values ({keyword_dictionary_id}, {request.POST['finalFrequency']}, '{request.POST['finalUrl']}', NOW(), NOW()) ;""")
                     cursor.execute(f"""insert into dictionary_history (keyword_dictionary_id, word, created_date, modified_date)
                                     values ({keyword_dictionary_id}, 
                                             '{request.POST['finalWord']}', now(), now())""")
