@@ -185,15 +185,19 @@
       </table>
     </div>
 
-    <!-- <br>
+    <br>
     <br>
     <div>
       <ul style="display:flex;list-style: none;">
         {% for page in paginator.page_range %}
-          <li style="margin:3px;"><a style="text-decoration: none; color: blue;" href="?page={{page}}">{{page}}</a></li>
+          {% if page == rows.number %}
+            <li style="margin:3px;"><a style="text-decoration: none; color: red;" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
+          {% else %}
+            <li style="margin:3px;"><a style="text-decoration: none; color: blue;" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
+          {% endif %}
         {% endfor %}
       </ul>
-    </div> -->
+    </div>
 
 
     <script>
@@ -275,6 +279,7 @@
         console.log(keyword) ;
         console.log(selectedUsage)
 
+        // 필터에서는 무조건 1페이지로 돌아감 ㅇㅈ? ㅇㅇㅈ
         sendPost('/check', {'mode': 'filter', 'query':keyword, 'selectedUsage':selectedUsage, 'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd, 'frequencyStart': frequencyStart, 'frequencyEnd': frequencyEnd})
       });
 

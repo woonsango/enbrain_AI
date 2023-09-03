@@ -101,25 +101,25 @@ def check(request):
                                                         from keyword
                                                         where keyword = '민법') ;""")
                 result = [i[0] for i in cursor.fetchall()]
-                if request.POST['finalWord'] in result:
-                    print('이미 존재하는 단어입니다')
-                else: 
-                    cursor.execute(f"""update keyword_dictionary
-                                    set word = '{request.POST['finalWord']}', usable = {request.POST['finalUsage']}, modified_date = now()
-                                    where id = (select tmp.id
-			                                    from (select id 
-                                                        from keyword_dictionary
-                                                        where word = '{request.POST['beforeWord']}' and keyword_id = (select id
-                                                                                            from keyword
-                                                                                            where keyword = '{request.POST['query']}')) tmp);""")
-                    print('update success')
-                    cursor.execute(f"""insert into dictionary_history (keyword_dictionary_id, word, created_date, modified_date)
-                                    values ((select id
-                                            from keyword_dictionary
-                                            where word = '{request.POST['finalWord']}'and keyword_id = (select id
+                # if request.POST['finalWord'] in result:
+                #     print('이미 존재하는 단어입니다')
+                # else: 
+                cursor.execute(f"""update keyword_dictionary
+                                set word = '{request.POST['finalWord']}', usable = {request.POST['finalUsage']}, modified_date = now()
+                                where id = (select tmp.id
+                                            from (select id 
+                                                    from keyword_dictionary
+                                                    where word = '{request.POST['beforeWord']}' and keyword_id = (select id
                                                                                         from keyword
-                                                                                        where keyword = '{request.POST['query']}')), 
-                                            '{request.POST['finalWord']}', now(), now()) ;""")
+                                                                                        where keyword = '{request.POST['query']}')) tmp);""")
+                print('update success')
+                cursor.execute(f"""insert into dictionary_history (keyword_dictionary_id, word, created_date, modified_date)
+                                values ((select id
+                                        from keyword_dictionary
+                                        where word = '{request.POST['finalWord']}'and keyword_id = (select id
+                                                                                    from keyword
+                                                                                    where keyword = '{request.POST['query']}')), 
+                                        '{request.POST['finalWord']}', now(), now()) ;""")
         elif request.POST['mode'] == 'delete' :
             print(request.POST)
             with connection.cursor() as cursor:
@@ -145,8 +145,10 @@ def check(request):
 
         
         word = request.POST['query']
+        page = 1
     else:
         word = request.GET.get('query')
+        page = request.GET.get('page')
 
     #db 불러오기
     with connection.cursor() as cursor:
@@ -182,23 +184,21 @@ def check(request):
         rows = cursor.fetchall()
         rows = [ (i[0], i[1], i[2], i[3], i[4], i[5], i[6].split(',')) for i in rows]
 
-        # page = request.GET.get('page')
+        paginator = Paginator(rows, 2000)
 
-        # paginator = Paginator(rows, 2)
-
-        # try:
-        #     page_obj = paginator.page(page)
-        # except PageNotAnInteger:
-        #     page = 1
-        #     page_obj = paginator.page(page)
-        # except EmptyPage:
-        #     page = paginator.num_pages # 가장 마지막 페이지
-        #     page_obj = paginator.page(page)
+        try:
+            page_obj = paginator.page(page)
+        except PageNotAnInteger:
+            page = 1
+            page_obj = paginator.page(page)
+        except EmptyPage:
+            page = paginator.num_pages # 가장 마지막 페이지
+            page_obj = paginator.page(page)
 
     # print(rows)
 
-    return render(request, 'main/check.html', {'rows': rows, 'keyword':word})
-    # return render(request, 'main/check.html', {'rows': page_obj, 'keyword':word, 'paginator': paginator})
+    # return render(request, 'main/check.html', {'rows': rows, 'keyword':word})
+    return render(request, 'main/check.html', {'rows': page_obj, 'keyword':word, 'paginator': paginator})
 
 def history(request):
 
