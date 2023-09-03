@@ -42,7 +42,7 @@ def check(request):
                                 group by keyword_dictionary_id
                             )
                             -- where keyword_dictionary_id = 42 ;
-                            SELECT d.id, d.word, d.usable, cast(cast(d.created_date as date) as char), cast(cast(d.modified_date as date) as char), freq_info.frequency, TRIM(TRAILING ', ' FROM group_concat(url_info.url, ', ')) as url
+                            SELECT d.id, d.word, d.usable, cast(date_format(d.created_date, '%Y-%m-%d %H:%i') as char), cast(date_format(d.modified_date, '%Y-%m-%d %H:%i') as char), freq_info.frequency, TRIM(TRAILING ', ' FROM group_concat(url_info.url, ', ')) as url
                             FROM mydb.keyword_dictionary d
                             join mydb.keyword k on d.keyword_id = k.id
                             join freq_info on d.id = freq_info.keyword_dictionary_id
@@ -171,7 +171,7 @@ def check(request):
                                 group by keyword_dictionary_id
                             )
                             -- where keyword_dictionary_id = 42 ;
-                            SELECT d.id, d.word, d.usable, cast(cast(d.created_date as date) as char), cast(cast(d.modified_date as date) as char), freq_info.frequency, TRIM(TRAILING ', ' FROM group_concat(url_info.url, ', ')) as url
+                            SELECT d.id, d.word, d.usable, cast(date_format(d.created_date, '%Y-%m-%d %H:%i') as char), cast(date_format(d.modified_date, '%Y-%m-%d %H:%i') as char), freq_info.frequency, TRIM(TRAILING ', ' FROM group_concat(url_info.url, ', ')) as url
                             FROM mydb.keyword_dictionary d
                             join mydb.keyword k on d.keyword_id = k.id
                             join freq_info on d.id = freq_info.keyword_dictionary_id
@@ -207,7 +207,7 @@ def history(request):
     print(keyword)
     print(word)
     with connection.cursor() as cursor:
-        cursor.execute(f"""select word, usable, cast(cast(created_date as date) as char), cast(cast(modified_date as date) as char)
+        cursor.execute(f"""select word, usable, cast(date_format(created_date, '%Y-%m-%d %H:%i') as char), cast(date_format(modified_date, '%Y-%m-%d %H:%i') as char)
                             from dictionary_history
                             where keyword_dictionary_id = (select id 
                                                             from keyword_dictionary
@@ -281,7 +281,7 @@ def keywords(request):
             print(request.POST['modifyDateStart'])
             print(request.POST['modifyDateEnd'])
             with connection.cursor() as cursor:
-                cursor.execute(f"""select keyword, cast(cast(created_date as date) as char), cast(cast(modified_date as date) as char)
+                cursor.execute(f"""select keyword, cast(date_format(created_date, '%Y-%m-%d %H:%i') as char), cast(date_format(modified_date, '%Y-%m-%d %H:%i') as char)
                                     from keyword
                                     where remove = 1 and 
                                         ((created_date >= case '{request.POST['addDateStart']}' when '' then '2003-04-01' else '{request.POST['addDateStart']}' end) and 
@@ -317,7 +317,7 @@ def keywords(request):
     #db 불러오기
     with connection.cursor() as cursor:
         # query문 실행(keyword table 가져오기)
-        cursor.execute("""SELECT keyword, cast(cast(created_date as date) as char), cast(cast(modified_date as date) as char)
+        cursor.execute(f"""SELECT keyword, cast(date_format(created_date, '%Y-%m-%d %H:%i') as char), cast(date_format(modified_date, '%Y-%m-%d %H:%i') as char)
                             FROM keyword
                             where remove = 1 ;""")
         # query문 결과 모두를 tuple로 저장
@@ -371,7 +371,7 @@ def delWord(request):
                                 group by keyword_dictionary_id
                             )
                             -- where keyword_dictionary_id = 42 ;
-                            SELECT d.id, d.word, d.usable, cast(cast(d.modified_date as date) as char), freq_info.frequency, TRIM(TRAILING ', ' FROM group_concat(url_info.url, ', ')) as url
+                            SELECT d.id, d.word, d.usable, cast(date_format(d.modified_date, '%Y-%m-%d %H:%i') as char), freq_info.frequency, TRIM(TRAILING ', ' FROM group_concat(url_info.url, ', ')) as url
                             FROM mydb.keyword_dictionary d
                             join mydb.keyword k on d.keyword_id = k.id
                             join freq_info on d.id = freq_info.keyword_dictionary_id
@@ -396,7 +396,7 @@ def delKeyword(request):
                                 where keyword = '{re_keyword}' ;""")
 
     with connection.cursor() as cursor:
-        cursor.execute(f"""SELECT keyword, cast(cast(modified_date as date) as char)
+        cursor.execute(f"""SELECT keyword, cast(date_format(modified_date, '%Y-%m-%d %H:%i') as char)
                             FROM keyword
                             where remove = 0 ;""")
         rows = cursor.fetchall()
