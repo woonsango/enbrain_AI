@@ -166,7 +166,7 @@
 
         <tbody style="cursor: pointer;">
           {% for row in rows %}
-            <tr onclick="javascript:select_table(this);"> <!-- 첫 번째 줄 시작 -->
+            <tr onclick="javascript:select_table(this);">
               <td>{{row.1}}</td>
               <td>{{row.2}}</td>
               <td>{{row.3}}</td>
@@ -187,13 +187,14 @@
 
     <br>
     <br>
-    <div>
+    <!-- 페이징 번호 -->
+    <div style="display: flex; justify-content: center;">
       <ul style="display:flex;list-style: none;">
         {% for page in paginator.page_range %}
           {% if page == rows.number %}
-            <li style="margin:3px;"><a style="text-decoration: none; color: red;" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
+            <li style="margin:3px;"><a style="text-decoration: none; font-weight: bold; color: #000" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
           {% else %}
-            <li style="margin:3px;"><a style="text-decoration: none; color: blue;" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
+            <li style="margin:3px;"><a style="text-decoration: none; color: #000" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
           {% endif %}
         {% endfor %}
       </ul>
@@ -434,10 +435,17 @@
           var finalUsage = inputs[1].value;
           var finalUrl = inputs[2].value;
 
+          // 추가할 때의 url 형태 가공
+          var urls = finalUrl.split(',');
+          var addHrefUrl = []
+          for (var i = 0; i < urls.length; i++) {
+            addHrefUrl.push('<a href="' + urls[i] + '" target="_blank">' + urls[i].replace("https://ko.wikipedia.org/wiki/", "") + '</a>');
+            }
+          
           var cells = newRow.cells;
           cells[0].innerHTML = finalWord;
           cells[1].innerHTML = finalUsage;
-          cells[4].innerHTML = finalUrl;
+          cells[4].innerHTML = addHrefUrl.join('<br>');
 
           addMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
           setButtonActionInProgress(false); // 버튼 활성화
@@ -547,10 +555,15 @@
         var finalWord = cells[0].getElementsByTagName('input')[0].value;
         var finalUsage = cells[1].getElementsByTagName('input')[0].value;
         var finalUrl = cells[4].getElementsByTagName('input')[0].value;
+        var hrefUrl = finalUrl.split(",");   // 하이퍼링크 형태로 넣기 위한 리스트
+        for (var i = 0; i < urls.length; i++) {
+          hrefUrl.push('<a href="https://ko.wikipedia.org/wiki/' + urls[i] + '" target="_blank">' + urls[i] + '</a>');
+        }
 
         cells[0].innerHTML = finalWord;
         cells[1].innerHTML = finalUsage;
-        cells[4].innerHTML = finalUrl;
+        cells[4].innerHTML = hrefUrl.join('<br>');
+
 
         // word와 usage가 변경될 때만 modifyDate 값을 변경
         if (word !== finalWord || usage !== finalUsage || urls !== finalUrl) {
