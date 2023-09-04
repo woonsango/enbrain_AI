@@ -55,15 +55,15 @@ def check(request):
                                     (d.modified_date <= case '{request.POST['modifyDateEnd']}' when '' then now() else '{request.POST['modifyDateEnd']}' end)) and 
                                     (freq_info.frequency >= case '{request.POST['frequencyStart']}' when '' then 0 else cast('{request.POST['frequencyStart']}' as unsigned) end and freq_info.frequency <= case '{request.POST['frequencyEnd']}' when '' then 999999999 else cast('{request.POST['frequencyEnd']}' as unsigned) end) and
                                     d.usable = case '{request.POST['selectedUsage']}' when 'one' then 1
-															when 'zero' then 0
-                                                            when 'entire' then  0 or d.usable = 1 end
+                                                                                    when 'zero' then 0
+                                                                                    when 'entire' then  0 or d.usable = 1 end
                             group by d.id
                             order by 6 desc ;""")
                 # query문 결과 모두를 tuple로 저장
                 rows = cursor.fetchall()
                 rows = [ (i[0], i[1], i[2], i[3], i[4], i[5], i[6].split(',')) for i in rows]
                 # print(rows)
-            return render(request, 'main/check.html', {"rows":rows, 'keyword':request.POST['query']})
+            return render(request, 'main/check.html', {"rows":rows, 'keyword':request.POST['query'], "rowCount": len(rows)})
         elif request.POST['mode'] == 'add':
             print(request.POST)
             with connection.cursor() as cursor:
@@ -183,6 +183,7 @@ def check(request):
         # query문 결과 모두를 tuple로 저장
         rows = cursor.fetchall()
         rows = [ (i[0], i[1], i[2], i[3], i[4], i[5], i[6].split(',')) for i in rows]
+        # print(len(rows))
 
         paginator = Paginator(rows, 2000)
 
@@ -198,7 +199,7 @@ def check(request):
     # print(rows)
 
     # return render(request, 'main/check.html', {'rows': rows, 'keyword':word})
-    return render(request, 'main/check.html', {'rows': page_obj, 'keyword':word, 'paginator': paginator})
+    return render(request, 'main/check.html', {'rows': page_obj, 'keyword':word, 'paginator': paginator, 'rowCount':len(rows)})
 
 def history(request):
 

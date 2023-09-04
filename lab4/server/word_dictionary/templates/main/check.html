@@ -81,7 +81,7 @@
 
   
   <div class="input-container" style="padding-top: 5%;">
-      <p id="total" style="margin-left: 6%;"></p>
+      <p id="total" style="margin-left: 6%;">{{rowCount}}</p>
       <div class="button-container">
         <button class="icon-button" id="open-modal-btn"><img src="{% static 'images/btn_imgs/filter.png' %}" alt="필터" width="17px"></button>
         <button class="icon-button"><img src="{% static 'images/btn_imgs/add.png' %}" alt="추가" width="17px" onclick="add_table()"></button>
@@ -288,16 +288,16 @@
 
 
   // 검색 결과 개수 함수
-      function rowCount() {
-        var table = document.getElementById('table');
-        var rowCnt = table.tBodies[0].rows.length;
-        document.getElementById("total").innerHTML = "총 단어 개수: " + rowCnt;
-      }
+      //function rowCount() {
+      //  var table = document.getElementById('table');
+      //  var rowCnt = table.tBodies[0].rows.length;
+      //  document.getElementById("total").innerHTML = "총 단어 개수: " + rowCnt;
+      //}
 
       // 초기 검색 결과 개수 표시
-      window.onload = function () {
-        rowCount();
-      };
+      // window.onload = function () {
+      //   rowCount();
+      // };
 
 
 
@@ -394,7 +394,7 @@
           cancelBtn.addEventListener('click', function() {
             newRow.remove(); // 해당 행을 삭제
             setButtonActionInProgress(false); // 버튼 활성화
-            rowCount()   // 총 키워드 개수 업데이트
+            // rowCount()   // 총 키워드 개수 업데이트
           });
 
           // 클릭 이벤트 추가
@@ -424,7 +424,7 @@
             }
           });
 
-          rowCount()   // 총 단어 개수 업데이트
+          // rowCount()   // 총 단어 개수 업데이트
         }
 
         // 2-1. 행 추가 내용 저장
@@ -611,7 +611,7 @@
 
             selectedRows = [];
 
-            rowCount()   // 총 단어 개수 업데이트
+            // rowCount()   // 총 단어 개수 업데이트
           }
 
           setButtonActionInProgress(false); // 버튼 활성화
