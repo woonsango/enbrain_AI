@@ -422,11 +422,6 @@
               addSave(event, newRow);
             }
           });
-          inputs[3].addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-              addSave(event, newRow);
-            }
-          });
 
           rowCount()   // 총 단어 개수 업데이트
         }
@@ -438,13 +433,11 @@
           var finalWord = inputs[0].value;
           var finalUsage = inputs[1].value;
           var finalUrl = inputs[2].value;
-          var finalFrequency = inputs[3].value;
 
           var cells = newRow.cells;
           cells[0].innerHTML = finalWord;
           cells[1].innerHTML = finalUsage;
           cells[4].innerHTML = finalUrl;
-          cells[5].innerHTML = finalFrequency;
 
           addMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
           setButtonActionInProgress(false); // 버튼 활성화
@@ -452,10 +445,10 @@
           console.log(finalWord) ;
           console.log(finalUsage) ;
           console.log(finalUrl) ;
-          console.log(finalFrequency) ;
+          // console.log(finalFrequency) ;
           console.log(saveKeyword) ;
           var keyword = document.querySelector("#select-word").textContent ;
-          sendPost('/check', {'mode': 'add', 'query':keyword.trim(), 'finalWord':finalWord.trim(), 'finalUsage': finalUsage, 'finalUrl':finalUrl.trim(), "finalFrequency": finalFrequency.trim()}) ;
+          sendPost('/check', {'mode': 'add', 'query':keyword.trim(), 'finalWord':finalWord.trim(), 'finalUsage': finalUsage, 'finalUrl':finalUrl.trim()}) ;
         }
       }
 
@@ -630,4 +623,5 @@
     </script>
 </body>
 </html>
+
 
