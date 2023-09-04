@@ -166,7 +166,7 @@
 
         <tbody style="cursor: pointer;">
           {% for row in rows %}
-            <tr onclick="javascript:select_table(this);"> <!-- 첫 번째 줄 시작 -->
+            <tr onclick="javascript:select_table(this);">
               <td>{{row.1}}</td>
               <td>{{row.2}}</td>
               <td>{{row.3}}</td>
@@ -183,6 +183,21 @@
             {% endfor %}
         </tbody>
       </table>
+    </div>
+
+    <br>
+    <br>
+    <!-- 페이징 번호 -->
+    <div style="display: flex; justify-content: center;">
+      <ul style="display:flex;list-style: none;">
+        {% for page in paginator.page_range %}
+          {% if page == rows.number %}
+            <li style="margin:3px;"><a style="text-decoration: none; font-weight: bold; color: #000" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
+          {% else %}
+            <li style="margin:3px;"><a style="text-decoration: none; color: #000" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
     </div>
 
 
@@ -251,7 +266,7 @@
     // 적용 버튼 클릭 시, 검색 필터 적용
       const applyBtn = document.getElementById('apply-btn');
       applyBtn.addEventListener('click', () => {
-        var selectedUsage = document.querySelector('input[name="usage"]:checked').value;   // 사용여부 값
+        var selectedUsage = document.querySelector('input[name="usage"]:checked').id;   // 사용여부 값
         const addDateStart = document.getElementById('add-date-start').value;   // 생성일자 시작 날짜
         const addDateEnd = document.getElementById('add-date-end').value;   // 생성일자 끝 날짜
 
@@ -263,8 +278,10 @@
 
         var keyword = document.querySelector("#select-word").textContent ;
         console.log(keyword) ;
+        console.log(selectedUsage)
 
-        sendPost('/check', {'mode': 'filter', 'query':keyword, 'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd, 'frequencyStart': frequencyStart, 'frequencyEnd': frequencyEnd})
+        // 필터에서는 무조건 1페이지로 돌아감 ㅇㅈ? ㅇㅇㅈ
+        sendPost('/check', {'mode': 'filter', 'query':keyword, 'selectedUsage':selectedUsage, 'addDateStart': addDateStart, 'addDateEnd': addDateEnd, 'modifyDateStart':modifyDateStart, 'modifyDateEnd': modifyDateEnd, 'frequencyStart': frequencyStart, 'frequencyEnd': frequencyEnd})
       });
 
 
@@ -406,11 +423,6 @@
               addSave(event, newRow);
             }
           });
-          inputs[3].addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-              addSave(event, newRow);
-            }
-          });
 
           rowCount()   // 총 단어 개수 업데이트
         }
@@ -422,13 +434,11 @@
           var finalWord = inputs[0].value;
           var finalUsage = inputs[1].value;
           var finalUrl = inputs[2].value;
-          var finalFrequency = inputs[3].value;
 
           var cells = newRow.cells;
           cells[0].innerHTML = finalWord;
           cells[1].innerHTML = finalUsage;
           cells[4].innerHTML = finalUrl;
-          cells[5].innerHTML = finalFrequency;
 
           addMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
           setButtonActionInProgress(false); // 버튼 활성화
@@ -436,10 +446,10 @@
           console.log(finalWord) ;
           console.log(finalUsage) ;
           console.log(finalUrl) ;
-          console.log(finalFrequency) ;
+          // console.log(finalFrequency) ;
           console.log(saveKeyword) ;
           var keyword = document.querySelector("#select-word").textContent ;
-          sendPost('/check', {'mode': 'add', 'query':keyword.trim(), 'finalWord':finalWord.trim(), 'finalUsage': finalUsage, 'finalUrl':finalUrl.trim(), "finalFrequency": finalFrequency.trim()}) ;
+          sendPost('/check', {'mode': 'add', 'query':keyword.trim(), 'finalWord':finalWord.trim(), 'finalUsage': finalUsage, 'finalUrl':finalUrl.trim()}) ;
         }
       }
 
@@ -584,6 +594,8 @@
               delete_word[i] = row.querySelector('td').innerHTML
             }
             console.log(delete_word) ;
+            var keyword = document.querySelector("#select-word").textContent ;
+            sendPost('/check', {'mode': 'delete', 'query':keyword, 'delete_word': [delete_word]}) ;
 
             selectedRows = [];
 
@@ -599,14 +611,17 @@
 
     // 5. 삭제 내역창 이동 함수
       function historyOfDelete() {    
-        if (saveKeyword) {
-          sessionStorage.setItem("keyword", saveKeyword)
-        }
+        // if (saveKeyword) {
+        //   sessionStorage.setItem("keyword", saveKeyword)
+        // }
+        var keyword = document.querySelector("#select-word").textContent ;
+
 
         // 페이지 이동
         const open = window.open("about:blank")
-        open.location.href = "/delWord"
+        open.location.href = "/delWord?keyword=" + keyword ;
       }
     </script>
 </body>
 </html>
+

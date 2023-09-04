@@ -19,7 +19,7 @@
 <body>
     <div class="container" style="padding-top: 5%;">
         <div class="input-container">
-          <h1 id="select-word">단어 삭제 내역</h1>
+          <h1 id="select-word">키워드 '{{keyword}}'의 단어 삭제 내역</h1>
         </div>
       </div>
 
@@ -40,14 +40,18 @@
           <tbody>
             {% for row in rows %}
               <tr onclick="javascript:select_table(this);">
-                <td>단어</td>
-                <td>사용 여부</td>
-                <td>삭제일자</td>
-                <td>URL</td>
-                <td>빈도수</td>
+                <td>{{row.1}}</td>
+                <td>{{row.2}}</td>
+                <td>{{row.3}}</td>
+                <td>
+                  {%for url in row.5 %}
+                  <a href={{url}} target="_blank">{{url|slice:"30:"}}</a><br>
+                  {% endfor %}
+                </td>
+                <td>{{row.4}}</td>
                 <td><button id="restore-btn" class="restore-button" onclick="restore(this.parentNode.parentNode)">복구</button></td>
               </tr>
-              {% endfor %}
+            {% endfor %}
           </tbody>
         </table>
       </div>
@@ -56,8 +60,28 @@
 
       <script>
         // check.html에서 저장했던 세션 스토리지에서 데이터 불러와서 넣기
-        const saveKeyword = sessionStorage.getItem("keyword");
-        document.getElementById("select-word").textContent = "키워드 '" + (saveKeyword ? saveKeyword : '') + "'의 단어 삭제 내역";
+        // const saveKeyword = sessionStorage.getItem("keyword");
+        // document.getElementById("select-word").textContent = "키워드 '" + (saveKeyword ? saveKeyword : '') + "'의 단어 삭제 내역";
+
+        // server로 데이터 보내기 위한 함수
+      function sendPost(url, params) {
+            var form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', url);
+            form.innerHTML = '{% csrf_token %}'
+            document.charset = "UTF-8";
+
+            for (var key in params) {
+                var hiddenField = document.createElement('input');
+                hiddenField.setAttribute('type', 'hidden');
+                hiddenField.setAttribute('name', key);
+                hiddenField.setAttribute('value', params[key]);
+                form.appendChild(hiddenField);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        }
 
 
     // 페이지 이동
@@ -65,11 +89,17 @@
             const confirmRestore = confirm("이 단어를 복구하시겠습니까?");   // 복구 확인 메세지
             
             if (confirmRestore) {
+                var re_word = word.querySelector("td").textContent ;
+                var keyword = document.querySelector("#select-word").textContent.split('\'')[1]
+                console.log(re_word, keyword) ;
+
                 word.remove();
+                
 
                 // 단어 삭제값 변경하기
 
                 alert("복구 완료되었습니다.");
+                sendPost('/delWord', {'keyword':keyword, 're_word':re_word})
             } else {
                 alert("복구가 취소되었습니다.");
                 }
@@ -77,3 +107,4 @@
         </script>
 </body>
 </html>
+
