@@ -81,7 +81,7 @@
 
   
   <div class="input-container" style="padding-top: 5%;">
-      <p id="total" style="margin-left: 6%;"></p>
+      <p id="total" style="margin-left: 6%;">총 단어 개수: {{rowCount}}</p>
       <div class="button-container">
         <button class="icon-button" id="open-modal-btn"><img src="{% static 'images/btn_imgs/filter.png' %}" alt="필터" width="17px"></button>
         <button class="icon-button"><img src="{% static 'images/btn_imgs/add.png' %}" alt="추가" width="17px" onclick="add_table()"></button>
@@ -288,16 +288,16 @@
 
 
   // 검색 결과 개수 함수
-      function rowCount() {
-        var table = document.getElementById('table');
-        var rowCnt = table.tBodies[0].rows.length;
-        document.getElementById("total").innerHTML = "총 단어 개수: " + rowCnt;
-      }
+      //function rowCount() {
+      //  var table = document.getElementById('table');
+      //  var rowCnt = table.tBodies[0].rows.length;
+      //  document.getElementById("total").innerHTML = "총 단어 개수: " + rowCnt;
+      //}
 
       // 초기 검색 결과 개수 표시
-      window.onload = function () {
-        rowCount();
-      };
+      // window.onload = function () {
+      //   rowCount();
+      // };
 
 
 
@@ -394,7 +394,7 @@
           cancelBtn.addEventListener('click', function() {
             newRow.remove(); // 해당 행을 삭제
             setButtonActionInProgress(false); // 버튼 활성화
-            rowCount()   // 총 키워드 개수 업데이트
+            // rowCount()   // 총 키워드 개수 업데이트
           });
 
           // 클릭 이벤트 추가
@@ -424,7 +424,7 @@
             }
           });
 
-          rowCount()   // 총 단어 개수 업데이트
+          // rowCount()   // 총 단어 개수 업데이트
         }
 
         // 2-1. 행 추가 내용 저장
@@ -435,10 +435,17 @@
           var finalUsage = inputs[1].value;
           var finalUrl = inputs[2].value;
 
+          // 추가할 때의 url 형태 가공
+          var urls = finalUrl.split(',');
+          var addHrefUrl = []
+          for (var i = 0; i < urls.length; i++) {
+            addHrefUrl.push('<a href="' + urls[i] + '" target="_blank">' + urls[i].replace("https://ko.wikipedia.org/wiki/", "") + '</a>');
+            }
+          
           var cells = newRow.cells;
           cells[0].innerHTML = finalWord;
           cells[1].innerHTML = finalUsage;
-          cells[4].innerHTML = finalUrl;
+          cells[4].innerHTML = addHrefUrl.join('<br>');
 
           addMoveBtn.disabled = false;   // 용어단어집 이동 버튼 활성화
           setButtonActionInProgress(false); // 버튼 활성화
@@ -549,13 +556,15 @@
         var finalUsage = cells[1].getElementsByTagName('input')[0].value;
         var finalUrl = cells[4].getElementsByTagName('input')[0].value;
         var hrefUrl = finalUrl.split(",");   // 하이퍼링크 형태로 넣기 위한 리스트
+        console.log(hrefUrl)
+        var modifyHrefUrl = [];
         for (var i = 0; i < urls.length; i++) {
-          hrefUrl.push('<a href="https://ko.wikipedia.org/wiki/' + urls[i] + '" target="_blank">' + urls[i] + '</a>');
+          modifyHrefUrl.push('<a href="' + hrefUrl[i] + '" target="_blank">' + hrefUrl[i].replace("https://ko.wikipedia.org/wiki/", "") + '</a>');
         }
 
         cells[0].innerHTML = finalWord;
         cells[1].innerHTML = finalUsage;
-        cells[4].innerHTML = hrefUrl.join('<br>');
+        cells[4].innerHTML = modifyHrefUrl.join('<br>');
 
 
         // word와 usage가 변경될 때만 modifyDate 값을 변경
@@ -604,7 +613,7 @@
 
             selectedRows = [];
 
-            rowCount()   // 총 단어 개수 업데이트
+            // rowCount()   // 총 단어 개수 업데이트
           }
 
           setButtonActionInProgress(false); // 버튼 활성화
@@ -629,4 +638,5 @@
     </script>
 </body>
 </html>
+
 
