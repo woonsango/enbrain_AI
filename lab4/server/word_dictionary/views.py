@@ -196,10 +196,40 @@ def check(request):
             page = paginator.num_pages # 가장 마지막 페이지
             page_obj = paginator.page(page)
 
+        leftIndex = (int(page) - 2)
+        if leftIndex < 1:
+            leftIndex = 1
+
+        rightIndex = (int(page) + 2)
+        if rightIndex > paginator.num_pages:
+            rightIndex = paginator.num_pages
+
+        custum_range = range(leftIndex, rightIndex+1)
+    # print(custum_range)
+    # print(paginator.page_range)
+
+    prev = page_obj.has_previous()
+    if prev :   
+        prev_number = page_obj.previous_page_number()
+        p = prev
+        prev = list()
+        prev.append(p)
+        prev.append(prev_number)
+
+    next = page_obj.has_next()
+    if next:
+        next_number = page_obj.next_page_number()
+        n = next
+        next = list()
+        next.append(n)
+        next.append(next_number)
+
+    other_page = page_obj.has_other_pages()
+
     # print(rows)
 
     # return render(request, 'main/check.html', {'rows': rows, 'keyword':word})
-    return render(request, 'main/check.html', {'rows': page_obj, 'keyword':word, 'paginator': paginator, 'rowCount':len(rows)})
+    return render(request, 'main/check.html', {'rows': page_obj, 'keyword':word, 'paginator': paginator, 'rowCount':len(rows), 'prev':prev, 'next':next, 'other_page':other_page, 'custom_range':custum_range})
 
 def history(request):
 
