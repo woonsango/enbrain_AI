@@ -567,13 +567,15 @@
         var finalUsage = cells[1].getElementsByTagName('input')[0].value;
         var finalUrl = cells[4].getElementsByTagName('input')[0].value;
         var hrefUrl = finalUrl.split(",");   // 하이퍼링크 형태로 넣기 위한 리스트
+        var modifyHrefUrl = [];
         for (var i = 0; i < urls.length; i++) {
-          hrefUrl.push('<a href="https://ko.wikipedia.org/wiki/' + urls[i] + '" target="_blank">' + urls[i] + '</a>');
+            modifyHrefUrl.push('<a href="' + hrefUrl[i] + '" target="_blank">' + hrefUrl[i].replace("https://ko.wikipedia.org/wiki/", "") + '</a>');
         }
+
 
         cells[0].innerHTML = finalWord;
         cells[1].innerHTML = finalUsage;
-        cells[4].innerHTML = hrefUrl.join('<br>');
+        cells[4].innerHTML = modifyHrefUrl.join('<br>');
 
 
         // word와 usage가 변경될 때만 modifyDate 값을 변경
@@ -647,5 +649,6 @@
     </script>
 </body>
 </html>
+
 
 
