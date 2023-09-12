@@ -188,18 +188,29 @@
     <br>
     <br>
     <!-- 페이징 번호 -->
-    <div style="display: flex; justify-content: center;">
-      <ul style="display:flex;list-style: none;">
-        {% for page in paginator.page_range %}
-          {% if page == rows.number %}
-            <li style="margin:3px;"><a style="text-decoration: none; font-weight: bold; color: #000" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
-          {% else %}
-            <li style="margin:3px;"><a style="text-decoration: none; color: #000" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
-          {% endif %}
-        {% endfor %}
-      </ul>
-    </div>
+    {% if other_page %}
+      <div style="display: flex; justify-content: center;">
+        <ul style="display:flex;list-style: none;">
 
+          {% if prev.0 %}
+            <li style="margin: 3px;"><a style="text-decoration: none; color: black;" href="?query={{keyword}}&page={{prev.1}}">&#10094; Prev</a></li>
+          {% endif %}
+
+          {% for page in custom_range %}
+            {% if page == rows.number %}
+              <li style="margin:3px;"><a style="text-decoration: none; font-weight: bold; color: #000" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
+            {% else %}
+              <li style="margin:3px;"><a style="text-decoration: none; color: #000" href="?query={{keyword}}&page={{page}}">{{page}}</a></li>
+            {% endif %}
+          {% endfor %}
+
+          {% if next.0 %}
+            <li style="margin: 3px;"><a style="text-decoration: none; color: black;" href="?query={{keyword}}&page={{next.1}}">&#10095; Next</a></li>
+          {% endif %}
+
+        </ul>
+      </div>
+    {% endif %}
 
     <script>
 
@@ -382,7 +393,7 @@
           // 새로운 행에 기본값으로 추가
           cell1.innerHTML = '<button class="icon-button close-row-btn" style="margin-right: 20px;" onclick="cancelRow(this)">&times;</button>' +
                             '<input type="text" style="font-size: x-small" placeholder="단어">';
-          cell2.innerHTML = "1";
+          cell2.innerHTML = '<input type="text" style="font-size: x-small" placeholder="사용 여부">';
           cell3.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell4.innerHTML = year + "-" + month + "-" + date + " " + hours + ":" + minutes;
           cell5.innerHTML = '<input type="text" style="font-size: x-small" placeholder="url">';
@@ -556,11 +567,11 @@
         var finalUsage = cells[1].getElementsByTagName('input')[0].value;
         var finalUrl = cells[4].getElementsByTagName('input')[0].value;
         var hrefUrl = finalUrl.split(",");   // 하이퍼링크 형태로 넣기 위한 리스트
-        console.log(hrefUrl)
         var modifyHrefUrl = [];
         for (var i = 0; i < urls.length; i++) {
-          modifyHrefUrl.push('<a href="' + hrefUrl[i] + '" target="_blank">' + hrefUrl[i].replace("https://ko.wikipedia.org/wiki/", "") + '</a>');
+            modifyHrefUrl.push('<a href="' + hrefUrl[i] + '" target="_blank">' + hrefUrl[i].replace("https://ko.wikipedia.org/wiki/", "") + '</a>');
         }
+
 
         cells[0].innerHTML = finalWord;
         cells[1].innerHTML = finalUsage;
